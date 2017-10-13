@@ -4,8 +4,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "prop-types": "^15.6.0",
     "react": "~15.0",
     "react-dom": "~15.0",
+    "react-router-dom": "^4.2.2",
     "react-scripts": "0.9.5",
     "semantic-ui-css": "^2.2.12",
     "semantic-ui-react": "^0.74.2"
