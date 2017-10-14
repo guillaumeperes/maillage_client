@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Route } from "react-router-dom";
 import { Switch } from "react-router-dom";
 import HomePage from "../HomePage/HomePage";
+import PageNotFound from "../PageNotFound/PageNotFound";
 
 export default class Router extends Component {
     render() {
@@ -11,7 +12,7 @@ export default class Router extends Component {
             <BrowserRouter>
                 <Switch>
                     <Route exact path="/" component={HomePage} />
-                    <Route component={HomePage} />
+                    <Route component={PageNotFound} />
                 </Switch>
             </BrowserRouter>
         );
