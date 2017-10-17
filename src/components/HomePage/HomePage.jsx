@@ -1,5 +1,8 @@
 import React from "react";
 import { Component } from "react";
+import BarreDuHautAvecLaBareDeRecherche from "../BarreDuHautAvecLaBareDeRecherche/BarreDuHautAvecLaBareDeRecherche"
+import NouveauMaillage from "../NouveauMaillage/NouveauMaillage"
+
 
 export default class HomePage extends Component {
     constructor(props) {
@@ -12,7 +15,11 @@ export default class HomePage extends Component {
 
     render() {
         return (
+            <div> 
+            <NouveauMaillage></NouveauMaillage>
+            <BarreDuHautAvecLaBareDeRecherche></BarreDuHautAvecLaBareDeRecherche>
             <p>Hello World!</p>
+            </div>
         );
     }
 }
