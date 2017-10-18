@@ -1,6 +1,10 @@
 .TagsSidebar {
     background-color: #efecec;
     border-right: 1px solid #c5c5c5;
+    position: fixed;
+    width: 250px;
+    height: 100%;
+    top: 50px;
 }
 .TagsSidebar .TagsSidebar-title {
     text-align: center;
