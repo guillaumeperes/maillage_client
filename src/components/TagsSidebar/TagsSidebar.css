@@ -1,0 +1,27 @@
+.TagsSidebar {
+    background-color: #efecec;
+    border-right: 1px solid #c5c5c5;
+}
+.TagsSidebar .TagsSidebar-title {
+    text-align: center;
+    text-transform: uppercase;
+    background-color: #c5c5c5;
+    font-weight: bold;
+    padding: 20px 0 20px 0;
+}
+.TagsSidebar .TagsSidebar-list {
+    padding: 0 10px 15px 10px;
+}
+.TagsSidebar .TagsSidebar-list .checkbox label {
+    font-size: 13px;
+}
+.TagsSidebar .TagsSidebar-category {
+    margin-top: 20px;
+}
+.TagsSidebar .TagsSidebar-category h4 {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    padding-left: 3px;
+    border-bottom: 1px solid #c5c5c5;
+    font-size: 14px;
+}
