@@ -60,7 +60,7 @@ export default class TagsSidebar extends Component {
         return (
             <div className="TagsSidebar">
                 <div className="TagsSidebar-title">Filtrer par</div>
-                <Scrollbars autoHide style={{ width: "100%", height: "100%"}}>
+                <Scrollbars autoHide style={{ width: "100%", height: "calc(100% - 110px)" }}>
                     <div className="TagsSidebar-list">
                         { this.renderCategories(this.state.categories) }
                     </div>
