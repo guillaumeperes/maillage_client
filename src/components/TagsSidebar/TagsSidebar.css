@@ -1,8 +1,8 @@
 .TagsSidebar {
-    background-color: #efecec;
-    border-right: 1px solid #c5c5c5;
+    background-color: #ecebeb;
+    border-right: 1px solid #afafaf;
     position: fixed;
-    width: 250px;
+    width: 230px;
     height: 100%;
     top: 50px;
 }
@@ -11,7 +11,10 @@
     text-transform: uppercase;
     background-color: #c5c5c5;
     font-weight: bold;
-    padding: 20px 0 20px 0;
+    padding: 15px 0 15px 0;
+    border-bottom: 1px solid #afafaf;
+    font-size: 13px;
+    color: #545454;
 }
 .TagsSidebar .TagsSidebar-list {
     padding: 0 10px 15px 10px;
@@ -27,5 +30,4 @@
     padding-bottom: 5px;
     padding-left: 3px;
     border-bottom: 1px solid #c5c5c5;
-    font-size: 14px;
 }

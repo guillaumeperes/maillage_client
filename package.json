@@ -9,8 +9,10 @@
     "react": "~15.0",
     "react-custom-scrollbars": "^4.1.2",
     "react-dom": "~15.0",
+    "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "react-scripts": "0.9.5",
+    "redux": "^3.7.2",
     "semantic-ui-css": "^2.2.12",
     "semantic-ui-react": "^0.74.2"
   },
