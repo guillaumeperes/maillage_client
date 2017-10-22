@@ -1,0 +1,21 @@
+@media (max-width: 992px) {
+    .EventsSidebar {
+        display: none;
+    }
+}
+.EventsSidebar {
+    background-color: #efecec;
+    border-right: 1px solid #c5c5c5;
+    position: fixed;
+    width: 230px;
+    height: 100%;
+    top: 50px;
+    right: 0;
+}
+.EventsSidebar .EventsSidebar-title {
+    text-align: center;
+    text-transform: uppercase;
+    background-color: #c5c5c5;
+    font-weight: bold;
+    padding: 15px 0 15px 0;
+}

@@ -3,6 +3,8 @@ import { Component } from "react";
 import BarreDuHautAvecLaBareDeRecherche from "../BarreDuHautAvecLaBareDeRecherche/BarreDuHautAvecLaBareDeRecherche"
 import NouveauMaillage from "../NouveauMaillage/NouveauMaillage"
 import TagsSidebar from "../TagsSidebar/TagsSidebar";
+import EventsSidebar from "../EventsSidebar/EventsSidebar";
+import MeshesList from "../MeshesList/MeshesList";
 
 export default class HomePage extends Component {
     constructor(props) {
@@ -15,6 +17,8 @@ export default class HomePage extends Component {
             <div className="HomePage">
                 <BarreDuHautAvecLaBareDeRecherche />
                 <TagsSidebar />
+                <MeshesList />
+                <EventsSidebar />
             </div>
         );
     }
