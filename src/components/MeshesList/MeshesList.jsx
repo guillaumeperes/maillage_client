@@ -6,6 +6,8 @@ import { Label } from "semantic-ui-react";
 import { Image } from "semantic-ui-react";
 import { Button } from "semantic-ui-react";
 import { Icon } from "semantic-ui-react";
+import { Loader } from "semantic-ui-react";
+import { Dimmer } from "semantic-ui-react";
 import "./MeshesList.css";
 
 export default class MeshesList extends Component {
@@ -15,6 +17,12 @@ export default class MeshesList extends Component {
             "isLoading": true,
             "meshes": [{}, {}, {}]
         };
+    }
+
+    componentDidMount() {
+        this.setState(Object.assign({}, this.state, {
+            "isLoading": false
+        }));
     }
 
     renderMeshes() {
@@ -52,13 +60,23 @@ export default class MeshesList extends Component {
     }
 
     render() {
-        return (
-            <div className="MeshesList">
-                <div className="MeshesList-actions"></div>
-                <Grid padded={true} columns={3} className="MeshesList-list">
-                    { this.renderMeshes() }
-                </Grid>
-            </div>
-        );
+        if (this.state.isLoading) {
+            return (
+                <Dimmer.Dimmable as="div" className="MeshesList">
+                    <Dimmer active inverted className="MeshesList-loader">
+                        <Loader size="medium" inverted>Chargement en cours</Loader>
+                    </Dimmer>
+                </Dimmer.Dimmable>
+            );
+        } else {
+            return (
+                <div className="MeshesList">
+                    <div className="MeshesList-actions"></div>
+                    <Grid padded={true} columns={3} className="MeshesList-list">
+                        { this.renderMeshes() }
+                    </Grid>
+                </div>
+            );
+        }
     }
 }

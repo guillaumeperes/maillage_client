@@ -2,6 +2,10 @@
     margin: 50px 230px 0 230px;
     padding: 20px 10px 20px 10px;
 }
+.MeshesList-loader {
+    background-color: #f9f7f7 !important;
+    margin-top: 40px;
+}
 .MeshesList-mesh {
     margin: 0 0 10px 0 !important;
     background-color: white;
