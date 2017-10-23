@@ -9,6 +9,8 @@ import { Scrollbars } from "react-custom-scrollbars";
 import { connect } from "react-redux";
 import { addFilter } from "../../actions.js";
 import { removeFilter } from "../../actions.js";
+import { Loader } from "semantic-ui-react";
+import { Dimmer } from "semantic-ui-react";
 import "./TagsSidebar.css";
 
 class TagsSidebar extends Component {
@@ -83,16 +85,31 @@ class TagsSidebar extends Component {
     }
 
     render() {
-        return (
-            <div className="TagsSidebar">
-                <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
-                <Scrollbars autoHide style={{ width: "100%", height: "calc(100% - 100px)" }}>
-                    <div className="TagsSidebar-list">
-                        { this.renderCategories(this.state.categories) }
+        if (this.state.isLoading) {
+            return (
+                <div className="TagsSidebar">
+                    <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
+                    <div className="TagsSidebar-loader">
+                        <Dimmer.Dimmable as="div">
+                            <Dimmer active inverted>
+                                <Loader size="small" inverted>Chargement en cours</Loader>
+                            </Dimmer>
+                        </Dimmer.Dimmable>
                     </div>
-                </Scrollbars>
-            </div>
-        );
+                </div>
+            );
+        } else {
+            return (
+                <div className="TagsSidebar">
+                    <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
+                    <Scrollbars autoHide style={{ width: "100%", height: "calc(100% - 100px)" }}>
+                        <div className="TagsSidebar-list">
+                            { this.renderCategories(this.state.categories) }
+                        </div>
+                    </Scrollbars>
+                </div>
+            );
+        }
     }
 }
 

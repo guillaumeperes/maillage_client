@@ -6,6 +6,10 @@
     height: 100%;
     top: 50px;
 }
+.TagsSidebar .TagsSidebar-loader {
+    height: 100%;
+    margin-top: 40px;
+}
 .TagsSidebar .TagsSidebar-title {
     text-align: center;
     text-transform: uppercase;
