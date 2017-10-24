@@ -42,9 +42,10 @@ class TagsSidebar extends Component {
             let index = self.props.selectedFilters.findIndex(function(filter) {
                 return filter.id === tag.id;
             });
+            let label = tag.title + " (" + tag.meshesTags.length + ")";
             return (
                 <div key={i}>
-                    <Checkbox label={tag.title} defaultChecked={index !== -1} id={tag.id} title={tag.title} onChange={self.checkboxTagChange} />
+                    <Checkbox label={label} defaultChecked={index !== -1} id={tag.id} title={tag.title} onChange={self.checkboxTagChange} />
                 </div>
             );
         });
@@ -95,6 +96,15 @@ class TagsSidebar extends Component {
                                 <Loader size="small" inverted>Chargement en cours</Loader>
                             </Dimmer>
                         </Dimmer.Dimmable>
+                    </div>
+                </div>
+            );
+        } else if (this.state.categories.length === 0) {
+            return (
+                <div className="TagsSidebar">
+                    <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
+                    <div className="TagsSidebar-empty">
+                        Aucun filtre n'est disponnible.
                     </div>
                 </div>
             );
