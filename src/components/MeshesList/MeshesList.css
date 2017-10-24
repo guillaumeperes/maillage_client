@@ -17,12 +17,22 @@
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
+.MeshesList-mesh .MeshesList-meshIcon {
+    float: left;
+    margin-right: 10px;
+    width: 70px;
+    height: 70px;
+    background-color: #ecebeb;
+    border-radius: .3125em;
+    text-align: center;
+    padding-top: 25px;
+}
 .MeshesList-mesh .MeshesList-meshImage {
     float: left;
     margin-right: 10px;
 }
 .MeshesList-mesh .MeshesList-meshInfo {
-    margin-left: 70px;
+    margin-left: 80px;
 }
 .MeshesList-mesh .MeshesList-meshDate {
     margin-top: 3px;
@@ -35,6 +45,13 @@
 .MeshesList-mesh .MeshesList-meshTags span {
     padding: 4px;
     margin-top: 5px !important;
+}
+.MeshesList-mesh .MeshesList-meshMetadata {
+    font-size: 12px;
+    color: #525252;
+}
+.MeshesList-mesh .MeshesList-meshDigit {
+    font-weight: bold;
 }
 @media (max-width: 992px) {
     .MeshesList {
