@@ -2,6 +2,7 @@ import React from "react";
 import {Component} from "react";
 import { Dropdown, Icon, Menu } from 'semantic-ui-react'
 import "./BarreDuHautAvecLaBareDeRecherche.css";
+import NouveauMaillage from "../NouveauMaillage/NouveauMaillage"
 
 
 export default class BarreDuHautAvecLaBareDeRecherche extends Component{
@@ -17,6 +18,7 @@ export default class BarreDuHautAvecLaBareDeRecherche extends Component{
                             </Dropdown.Menu>
                         </Dropdown>
                         <Icon name='plus' size='big' onClick={this.clicHome} />
+                        <NouveauMaillage />
                     </Menu.Item>
                     </Menu>);
         }
