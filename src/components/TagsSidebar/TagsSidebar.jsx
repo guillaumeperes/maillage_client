@@ -46,7 +46,7 @@ class TagsSidebar extends Component {
         const self = this;
         const out = tags.map(function(tag, i) {
             const index = self.props.selectedFilters.indexOf(tag.id);
-            const label = tag.title + " (" + tag.meshes.length + ")";
+            const label = tag.title + " (" + tag.occurences + ")";
             return (
                 <div key={i}>
                     <Checkbox label={label} checked={index !== -1} id={tag.id} title={tag.title} onChange={self.checkboxTagChange} />
