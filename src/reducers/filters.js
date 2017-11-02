@@ -11,9 +11,7 @@ export default function filters(store, action) {
     // Ajoute un filtre à la recherche
     if (action.type === "ADD_FILTER") {
         let filters = store.selectedFilters;
-        let index = filters.findIndex(function(filter) {
-            return filter.id === action.payload.id;
-        });
+        const index = filters.indexOf(action.payload);
         if (index === -1) {
             filters.push(action.payload);
         }
@@ -24,9 +22,7 @@ export default function filters(store, action) {
     // Supprime un filtre de la recherche
     if (action.type === "REMOVE_FILTER") {
         let filters = store.selectedFilters;
-        let index = filters.findIndex(function(filter) {
-            return filter.id === action.payload.id;
-        });
+        const index = filters.indexOf(action.payload);
         if (index !== -1) {
             filters.splice(index, 1);
         }

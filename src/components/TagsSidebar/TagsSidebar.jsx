@@ -18,34 +18,38 @@ class TagsSidebar extends Component {
         super(props);
         this.state = {
             "isLoading": true,
+            "error": false,
             "categories": []
         };
         this.checkboxTagChange = this.checkboxTagChange.bind(this);
     }
 
     componentDidMount() {
-        let self = this;
-        let route = baseApiUrl + "/categories/list/";
+        const self = this;
+        const route = baseApiUrl + "/categories/list/";
         axios.get(route).then(function(response) {
             self.setState({
                 "isLoading": false,
+                "error": false,
                 "categories": response.data
             });
         }).catch(function(error) {
-            console.log(error); // Todo : rediriger vers une page d'erreur
+            self.setState({
+                "isLoading": false,
+                "error": true,
+                "categories": []
+            });
         });
     }
 
     renderTags(tags) {
-        let self = this;
-        let out = tags.map(function(tag, i) {
-            let index = self.props.selectedFilters.findIndex(function(filter) {
-                return filter.id === tag.id;
-            });
-            let label = tag.title + " (" + tag.meshesTags.length + ")";
+        const self = this;
+        const out = tags.map(function(tag, i) {
+            const index = self.props.selectedFilters.indexOf(tag.id);
+            const label = tag.title + " (" + tag.meshes.length + ")";
             return (
                 <div key={i}>
-                    <Checkbox label={label} defaultChecked={index !== -1} id={tag.id} title={tag.title} onChange={self.checkboxTagChange} />
+                    <Checkbox label={label} checked={index !== -1} id={tag.id} title={tag.title} onChange={self.checkboxTagChange} />
                 </div>
             );
         });
@@ -53,26 +57,46 @@ class TagsSidebar extends Component {
     }
 
     checkboxTagChange(e, data) {
-        let selectedFilter = {};
+        let exists = false;
         this.state.categories.forEach(function(category) {
             category.tags.forEach(function(tag) {
-                if (tag.id === data.id) {
-                    selectedFilter = tag;
+                if (data.id === tag.id) {
+                    exists = true;
                 }
             });
         });
-        if (typeof selectedFilter.id !== "undefined") {
+        if (exists) {
             if (data.checked === true) {
-                this.props.addFilterOnStore(selectedFilter);
-            } else if (data.checked === false) {
-                this.props.removeFilterOnStore(selectedFilter);
+                this.props.addFilterOnStore(data.id);
+            } else {
+                this.props.removeFilterOnStore(data.id);
             }
+            // Mise à jour de la liste des tags en fonction des filtres sélectionnés
+            let params = {};
+            if (this.props.selectedFilters.length > 0) {
+                params.filters = this.props.selectedFilters;
+            }
+            const self = this;
+            const route = baseApiUrl + "/categories/list/";
+            axios.get(route, {"params": params}).then(function(response) {
+                self.setState({
+                    "isLoading": false,
+                    "error": false,
+                    "categories": response.data
+                });
+            }).catch(function(error) {
+                self.setState({
+                    "isLoading": false,
+                    "error": true,
+                    "categories": []
+                });
+            });
         }
     }
 
     renderCategories(categories) {
-        let self = this;
-        let out = categories.map(function(category, i) {
+        const self = this;
+        const out = categories.map(function(category, i) {
             return (
                 <div className="TagsSidebar-category" key={i}>
                     <Header color="grey" size="tiny" as="h4">{category.title}</Header>
