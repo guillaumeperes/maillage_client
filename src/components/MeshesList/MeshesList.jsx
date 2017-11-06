@@ -12,13 +12,16 @@ import { Dimmer } from "semantic-ui-react";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import filesize from "filesize";
+import EditMeshModal from "../EditMeshModal/EditMeshModal";
+import { connect } from "react-redux";
 import "./MeshesList.css";
 
-export default class MeshesList extends Component {
+class MeshesList extends Component {
     constructor(props) {
         super(props);
         this.state = {
             "isLoading": true,
+            "error": false,
             "meshes": []
         };
     }
@@ -29,10 +32,42 @@ export default class MeshesList extends Component {
         axios.get(route).then(function(response) {
             self.setState({
                 "isLoading": false,
+                "error": false,
                 "meshes": response.data
             });
         }).catch(function(error) {
-            console.log(error); // Todo : redirection vers une page d'erreur
+            self.setState({
+                "isLoading": false,
+                "error": true,
+                "meshes": []
+            });
+        });
+    }
+
+    componentWillReceiveProps(nextProps) {
+        const self = this;
+        self.setState({
+            "isLoading": true,
+            "error": false,
+            "meshes": []
+        });
+        let params = {};
+        if (nextProps.selectedFilters.length > 0) {
+            params.filters = nextProps.selectedFilters;
+        }
+        const route = baseApiUrl + "/meshes/search/";
+        axios.get(route, {"params": params}).then(function(response) {
+            self.setState({
+                "isLoading": false,
+                "error": false,
+                "meshes": response.data
+            });
+        }).catch(function(error) {
+            self.setState({
+                "isLoading": false,
+                "error": true,
+                "meshes": []
+            });
         });
     }
 
@@ -85,7 +120,7 @@ export default class MeshesList extends Component {
                     </Grid.Column>
                     <Grid.Column width={3} textAlign="right" verticalAlign="middle">
                         <Button primary icon circular compact basic size="tiny" onClick={self.openMesh} data-tooltip="Voir"><Icon name="eye" /></Button>
-                        <Button secondary icon circular compact basic size="tiny" onClick={self.editMesh} data-tooltip="Modifier"><Icon name="pencil" /></Button>
+                        <EditMeshModal mesh={mesh} />
                         <Button negative icon circular compact basic size="tiny" onClick={self.deleteMesh} data-tooltip="Supprimer"><Icon name="trash" /></Button>
                     </Grid.Column>
                 </Grid.Row>
@@ -96,10 +131,6 @@ export default class MeshesList extends Component {
 
     openMesh() {
         console.log("Open");
-    }
-
-    editMesh() {
-        console.log("Edit");
     }
 
     deleteMesh() {
@@ -136,3 +167,13 @@ export default class MeshesList extends Component {
         }
     }
 }
+
+const mapStoreToProps = function(store) {
+    const selectedFilters = store.filters.selectedFilters.slice();
+    return {
+        "selectedFilters": selectedFilters
+    };
+};
+
+MeshesList = connect(mapStoreToProps)(MeshesList);
+export default MeshesList;

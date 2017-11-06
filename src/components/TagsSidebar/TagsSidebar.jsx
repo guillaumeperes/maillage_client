@@ -42,6 +42,28 @@ class TagsSidebar extends Component {
         });
     }
 
+    componentWillReceiveProps(nextProps) {
+        const self = this;
+        let params = {};
+        if (nextProps.selectedFilters.length > 0) {
+            params.filters = nextProps.selectedFilters;
+        }
+        const route = baseApiUrl + "/categories/list/";
+        axios.get(route, {"params": params}).then(function(response) {
+            self.setState({
+                "isLoading": false,
+                "error": false,
+                "categories": response.data
+            });
+        }).catch(function(error) {
+            self.setState({
+                "isLoading": false,
+                "error": true,
+                "categories": []
+            });
+        });
+    }
+
     renderTags(tags) {
         const self = this;
         const out = tags.map(function(tag, i) {
@@ -71,26 +93,6 @@ class TagsSidebar extends Component {
             } else {
                 this.props.removeFilterOnStore(data.id);
             }
-            // Mise à jour de la liste des tags en fonction des filtres sélectionnés
-            let params = {};
-            if (this.props.selectedFilters.length > 0) {
-                params.filters = this.props.selectedFilters;
-            }
-            const self = this;
-            const route = baseApiUrl + "/categories/list/";
-            axios.get(route, {"params": params}).then(function(response) {
-                self.setState({
-                    "isLoading": false,
-                    "error": false,
-                    "categories": response.data
-                });
-            }).catch(function(error) {
-                self.setState({
-                    "isLoading": false,
-                    "error": true,
-                    "categories": []
-                });
-            });
         }
     }
 
@@ -148,8 +150,9 @@ class TagsSidebar extends Component {
 }
 
 const mapStoreToProps = function(store) {
+    const selectedFilters = store.filters.selectedFilters.slice();
     return {
-        "selectedFilters": store.filters.selectedFilters
+        "selectedFilters": selectedFilters
     };
 };
 
