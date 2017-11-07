@@ -9,6 +9,7 @@ import { Button } from "semantic-ui-react";
 import { Icon } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
+import { Dropdown } from "semantic-ui-react";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import filesize from "filesize";
@@ -20,54 +21,71 @@ class MeshesList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            "isLoading": true,
-            "error": false,
-            "meshes": []
+            "listLoading": true,
+            "sortsLoading": true,
+            "meshes": [],
+            "sorts": []
         };
     }
 
     componentDidMount() {
         const self = this;
+        // Chargement des fichiers de maillage depuis le serveur
         const route = baseApiUrl + "/meshes/search/";
         axios.get(route).then(function(response) {
-            self.setState({
-                "isLoading": false,
-                "error": false,
+            const state = Object.assign({}, self.state, {
+                "listLoading": false,
                 "meshes": response.data
             });
+            self.setState(state);
         }).catch(function(error) {
-            self.setState({
-                "isLoading": false,
-                "error": true,
+            const state = Object.assign({}, self.state, {
+                "listLoading": false,
                 "meshes": []
             });
+            self.setState(state);
+        });
+        // Chargement des option de tri depuis le serveur
+        const routeSorts = baseApiUrl + "/meshes/sorts/";
+        axios.get(routeSorts).then(function(response) {
+            const state = Object.assign({}, self.state, {
+                "sortsLoading": false,
+                "sorts": response.data
+            });
+            self.setState(state);
+        }).catch(function(error) {
+            const state = Object.assign({}, self.state, {
+                "sortsLoading": false,
+                "sorts": []
+            });
+            self.setState(state);
         });
     }
 
     componentWillReceiveProps(nextProps) {
         const self = this;
-        self.setState({
-            "isLoading": true,
-            "error": false,
+        const state = Object.assign({}, self.state, {
+            "listLoading": true,
             "meshes": []
         });
+        self.setState(state);
         let params = {};
         if (nextProps.selectedFilters.length > 0) {
             params.filters = nextProps.selectedFilters;
         }
         const route = baseApiUrl + "/meshes/search/";
         axios.get(route, {"params": params}).then(function(response) {
-            self.setState({
-                "isLoading": false,
-                "error": false,
+            const state = Object.assign({}, self.state, {
+                "listLoading": false,
                 "meshes": response.data
             });
+            self.setState(state);
         }).catch(function(error) {
-            self.setState({
-                "isLoading": false,
-                "error": true,
+            const state = Object.assign({}, self.state, {
+                "listLoading": false,
                 "meshes": []
             });
+            self.setState(state);
         });
     }
 
@@ -129,6 +147,24 @@ class MeshesList extends Component {
         return out;
     }
 
+    renderSortDropdown() {
+        const options = this.state.sorts.map(function(sort, i) {
+            return {
+                "key": i,
+                "value": sort.name,
+                "text": sort.label
+            };
+        });
+        const defaultSort = this.state.sorts.find(function(sort) {
+            return sort.default;
+        });
+        if (this.state.sortsLoading) {
+            return <Dropdown loading disabled text="En cours de chargement" />;
+        } else {
+            return <Dropdown defaultValue={defaultSort.name} options={options} placeholder="Choisir un critère de tri" />;
+        }
+    }
+
     openMesh() {
         console.log("Open");
     }
@@ -138,7 +174,7 @@ class MeshesList extends Component {
     }
 
     render() {
-        if (this.state.isLoading) {
+        if (this.state.listLoading) {
             return (
                 <Dimmer.Dimmable as="div" className="MeshesList">
                     <Dimmer active inverted className="MeshesList-loader">
@@ -158,8 +194,18 @@ class MeshesList extends Component {
         } else {
             return (
                 <div className="MeshesList">
-                    <div className="MeshesList-actions"></div>
-                    <Grid padded={true} columns={4} className="MeshesList-list">
+                    <Grid padded stackable columns={2}>
+                        <Grid.Row>
+                            <Grid.Column width={8} textAlign="left">
+                                <span className="MeshesList-metaSortLabel">Trier par :</span>
+                                { this.renderSortDropdown() }
+                            </Grid.Column>
+                            <Grid.Column width={8} textAlign="right">
+                                <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                    <Grid padded columns={4} className="MeshesList-list">
                         { this.renderMeshes() }
                     </Grid>
                 </div>
