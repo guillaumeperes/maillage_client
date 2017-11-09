@@ -5,8 +5,9 @@
     top: 50px;
     left: 230px;
 }
-.MeshesList-content {
-    padding: 5px 20px 20px 20px;
+.MeshesList-meta {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
 }
 .MeshesList-metaSortLabel {
     margin-right: 10px;
@@ -22,6 +23,10 @@
 .MeshesList-loader {
     background-color: #f9f7f7 !important;
     margin-top: 40px;
+}
+.MeshesList-list {
+    margin-right: 10px !important;
+    padding: 5px 20px 20px 20px !important;
 }
 .MeshesList-mesh {
     margin: 0 0 10px 0 !important;

@@ -195,24 +195,22 @@ class MeshesList extends Component {
         } else {
             return (
                 <div className="MeshesList">
-                    <Scrollbars style={{ width: "100%", height: "calc(100% - 50px)"}}>
-                        <div className="MeshesList-content">
-                            <Grid padded stackable columns={2}>
-                                <Grid.Row>
-                                    <Grid.Column width={8} textAlign="left">
-                                        <span className="MeshesList-metaSortLabel">Trier par :</span>
-                                        { this.renderSortDropdown() }
-                                    </Grid.Column>
-                                    <Grid.Column width={8} textAlign="right">
-                                        <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
-                                    </Grid.Column>
-                                </Grid.Row>
-                            </Grid>
-                            <Grid padded columns={4} className="MeshesList-list">
-                                { this.renderMeshes() }
-                            </Grid>
-                        </div>
-                    </Scrollbars>    
+                    <Grid padded stackable columns={2} className="MeshesList-meta">
+                        <Grid.Row>
+                            <Grid.Column width={8} textAlign="left">
+                                <span className="MeshesList-metaSortLabel">Trier par :</span>
+                                { this.renderSortDropdown() }
+                            </Grid.Column>
+                            <Grid.Column width={8} textAlign="right">
+                                <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                    <Scrollbars style={{ width: "calc(100% - 10px)", height: "calc(100% - 100px)" }}>
+                        <Grid padded columns={4} className="MeshesList-list">
+                            { this.renderMeshes() }
+                        </Grid>
+                    </Scrollbars>
                 </div>
             );
         }
