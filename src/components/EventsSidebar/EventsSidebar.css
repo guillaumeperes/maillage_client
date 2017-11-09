@@ -1,21 +1,36 @@
-@media (max-width: 992px) {
-    .EventsSidebar {
-        display: none;
-    }
-}
 .EventsSidebar {
-    background-color: #efecec;
-    border-right: 1px solid #c5c5c5;
+    background-color: white;
+    border-left: 1px solid #c5c5c5;
+    box-shadow: -2px 0px 10px 1px #c5c5c5;
     position: fixed;
     width: 230px;
     height: 100%;
     top: 50px;
     right: 0;
 }
+.EventsSidebar .EventsSidebar-loader {
+    margin-top: 40px;
+}
+.EventsSidebar .EventsSidebar-empty {
+    margin-top: 10px;
+    padding: 0 10px 15px 10px;
+    color: #6f6d6d;
+    font-size: 13px;
+}
 .EventsSidebar .EventsSidebar-title {
+    padding: 15px 10px 15px 10px;
+    border-bottom: 1px solid #dedad8;
+    color: #585858;
     text-align: center;
     text-transform: uppercase;
-    background-color: #c5c5c5;
+    font-size: 16px;
     font-weight: bold;
-    padding: 15px 0 15px 0;
+}
+.EventsSidebar .EventsSidebar-title .icon {
+    margin-left: 10px;
+}
+@media (max-width: 992px) {
+    .EventsSidebar {
+        display: none;
+    }
 }
