@@ -1,6 +1,12 @@
 .MeshesList {
-    margin: 10px 230px 0 230px;
-    padding: 20px 10px 20px 10px;
+    position: fixed;
+    width: calc(100% - 460px);
+    height: 100%;
+    top: 50px;
+    left: 230px;
+}
+.MeshesList-content {
+    padding: 5px 20px 20px 20px;
 }
 .MeshesList-metaSortLabel {
     margin-right: 10px;
@@ -66,6 +72,6 @@
 }
 @media (max-width: 992px) {
     .MeshesList {
-        margin-right: 0;
+        width: calc(100% - 230px);
     }
 }
