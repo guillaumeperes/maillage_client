@@ -138,9 +138,16 @@ class MeshesList extends Component {
                         <div><span className="MeshesList-meshDigit">{parseInt(mesh.vertices, 10).toLocaleString()}</span> sommets</div>
                     </Grid.Column>
                     <Grid.Column width={3} textAlign="right" verticalAlign="middle">
-                        <Button primary icon circular compact basic size="tiny" onClick={self.openMesh} data-tooltip="Voir"><Icon name="eye" /></Button>
-                        <EditMeshModal mesh={mesh} />
-                        <Button negative icon circular compact basic size="tiny" onClick={self.deleteMesh} data-tooltip="Supprimer"><Icon name="trash" /></Button>
+                        <Dropdown icon={<Icon title="Actions" link name="setting" size="large" />}>
+                            <Dropdown.Menu className="left">
+                                <Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item>
+                                <EditMeshModal><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></EditMeshModal>
+                                <Dropdown.Divider />
+                                <Dropdown.Item><Icon name="download" />Télécharger</Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item><Icon name="trash" color="red" /><span style={{ color: "rgb(219, 40, 40)" }}>Supprimer</span></Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </Grid.Column>
                 </Grid.Row>
             );

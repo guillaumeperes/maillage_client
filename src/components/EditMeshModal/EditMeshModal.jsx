@@ -1,8 +1,6 @@
 import React from "react";
 import { Component } from "react";
 import { Modal } from "semantic-ui-react";
-import { Button } from "semantic-ui-react";
-import { Icon } from "semantic-ui-react";
 import { Container } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
@@ -33,7 +31,7 @@ export default class EditMeshModal extends Component {
     render() {
         if (this.state.isLoading) {
             return (
-                <Modal onOpen={this.loadMesh} defaultOpen={false} trigger={<Button secondary icon circular compact basic size="tiny" data-tooltip="Modifier"><Icon name="pencil" /></Button>}>
+                <Modal onOpen={this.loadMesh} defaultOpen={false} trigger={this.props.children}>
                     <Modal.Header>Chargement en cours</Modal.Header>
                     <Modal.Content>
                         <Container textAlign="center">
@@ -44,7 +42,7 @@ export default class EditMeshModal extends Component {
             );
         } else {
             return (
-                <Modal onOpen={this.loadMesh} defaultOpen={false} trigger={<Button secondary icon circular compact basic size="tiny" data-tooltip="Modifier"><Icon name="pencil" /></Button>}>
+                <Modal onOpen={this.loadMesh} defaultOpen={false} trigger={this.props.children}>
                     <Modal.Header>Modifier</Modal.Header>
                     <Modal.Content>test</Modal.Content>
                     <Modal.Actions>Une action mdr</Modal.Actions>
