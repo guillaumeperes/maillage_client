@@ -11,7 +11,7 @@ export default class BarreDuHautAvecLaBareDeRecherche extends Component{
                     <Menu borderless fixed="top" fluid className="BarreDuHautAvecLaBareDeRecherche">
                     <Menu.Item>
                         <Icon name='home' size='big' onClick={this.clicHome} />
-                        <Dropdown icon={<Icon name='setting' size='big' />} classeName='link item'>  
+                        <Dropdown icon={<Icon name='setting' size='big' />} className='link item'>  
                             <Dropdown.Menu>
                                     <Dropdown.Item onClick={this.clicGestUser}>Gestion des Utilisateurs</Dropdown.Item>
                                     <Dropdown.Item onClick={this.clicGestTag}>Gestion des Tags</Dropdown.Item>
