@@ -5,7 +5,6 @@ import { Container } from "semantic-ui-react";
 import { Grid } from "semantic-ui-react";
 import { Label } from "semantic-ui-react";
 import { Image } from "semantic-ui-react";
-import { Button } from "semantic-ui-react";
 import { Icon } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
@@ -15,6 +14,7 @@ import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import filesize from "filesize";
 import EditMeshModal from "../EditMeshModal/EditMeshModal";
+import ViewMeshModal from "../ViewMeshModal/ViewMeshModal";
 import { connect } from "react-redux";
 import "./MeshesList.css";
 
@@ -140,7 +140,7 @@ class MeshesList extends Component {
                     <Grid.Column width={3} textAlign="right" verticalAlign="middle">
                         <Dropdown icon={<Icon title="Actions" link name="setting" size="large" />}>
                             <Dropdown.Menu className="left">
-                                <Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item>
+                                <ViewMeshModal meshId={mesh.id}><Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item></ViewMeshModal>
                                 <EditMeshModal><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></EditMeshModal>
                                 <Dropdown.Divider />
                                 <Dropdown.Item><Icon name="download" />Télécharger</Dropdown.Item>

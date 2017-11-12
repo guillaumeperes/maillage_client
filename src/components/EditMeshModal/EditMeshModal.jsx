@@ -2,8 +2,8 @@ import React from "react";
 import { Component } from "react";
 import { Modal } from "semantic-ui-react";
 import { Container } from "semantic-ui-react";
-import { Loader } from "semantic-ui-react";
-import { Dimmer } from "semantic-ui-react";
+//import { Loader } from "semantic-ui-react";
+//import { Dimmer } from "semantic-ui-react";
 import axios from "axios";
 import { baseApiUrl } from "../../conf";
 
