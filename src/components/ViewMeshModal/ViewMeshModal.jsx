@@ -6,13 +6,15 @@ import { Button } from "semantic-ui-react";
 import { Header } from "semantic-ui-react";
 import { Segment } from "semantic-ui-react";
 import { Icon } from "semantic-ui-react";
-import { Divider } from "semantic-ui-react";
 import { Label } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
+import { Image } from "semantic-ui-react";
+import { Carousel } from "react-responsive-carousel";
 import axios from "axios";
 import filesize from "filesize";
 import { baseApiUrl } from "../../conf";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "./ViewMeshModal.css";
 
 export default class ViewMeshModal extends Component {
@@ -97,6 +99,19 @@ export default class ViewMeshModal extends Component {
             );
         });
         return out;
+    }
+
+    renderImages(mesh) {
+        if (mesh.images.length === 0) {
+            // TODO
+        } else if (mesh.images.length === 1) {
+            return <Image fluid rounded src={baseApiUrl + mesh.images[0].uri} alt={mesh.title} />
+        } else {
+            const items = mesh.images.map(function(image, i) {
+                return <div key={i}><Image fluid rounded src={baseApiUrl + image.uri} alt={mesh.title} /></div>;
+            });
+            return <Carousel showStatus={false} showThumbs={false} infiniteLoop autoPlay transitionTime={200} dynamicHeight>{items}</Carousel>;
+        }
     }
 
     render() {
@@ -186,7 +201,7 @@ export default class ViewMeshModal extends Component {
                         <Grid stackable columns={2}>
                             <Grid.Row>
                                 <Grid.Column width={9}>
-                                    
+                                    { this.renderImages(mesh) }
                                 </Grid.Column>
                                 <Grid.Column width={7}>
                                     { this.renderDescription(mesh) }
