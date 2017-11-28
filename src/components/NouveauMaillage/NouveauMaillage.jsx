@@ -77,7 +77,7 @@ export default class NouveauMaillage extends Component{
                                     <input placeholder='Nombre de cellule' />
                                 </Form.Field>
                                 {this.renderCategories(this.state.categories)}
-                                <Button type='submit'>Submit</Button>
+                                <Button type='submit' ><Icon name='save'/>Enregistrer </Button>
                                 
                             </Form>
                         </Container>

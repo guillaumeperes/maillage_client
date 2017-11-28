@@ -3,6 +3,7 @@ import {Component} from "react";
 import { Dropdown, Icon, Menu } from 'semantic-ui-react'
 import "./BarreDuHautAvecLaBareDeRecherche.css";
 import NouveauMaillage from "../NouveauMaillage/NouveauMaillage"
+import Recherche from "../Recherche/Recherche"
 
 
 export default class BarreDuHautAvecLaBareDeRecherche extends Component{
@@ -18,6 +19,7 @@ export default class BarreDuHautAvecLaBareDeRecherche extends Component{
                             </Dropdown.Menu>
                         </Dropdown>
                         <NouveauMaillage />
+                        <Recherche />
                     </Menu.Item>
                     </Menu>);
         }
