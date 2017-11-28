@@ -17,7 +17,6 @@ export default class BarreDuHautAvecLaBareDeRecherche extends Component{
                                     <Dropdown.Item onClick={this.clicGestTag}>Gestion des Tags</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                        <Icon name='plus' size='big' onClick={this.clicHome} />
                         <NouveauMaillage />
                     </Menu.Item>
                     </Menu>);

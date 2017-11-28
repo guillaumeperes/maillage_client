@@ -1,10 +1,57 @@
+import { baseApiUrl } from "../../conf";
 import React from "react";
 import {Component} from "react";
-import { Button, Header, Image, Modal, Icon, Form, Checkbox, Container, TextArea } from 'semantic-ui-react'
+import { Button, Header, Image, Modal, Icon, Form, Checkbox, Container, TextArea, Dropdown } from 'semantic-ui-react';
+import axios from "axios";
 
 
 
 export default class NouveauMaillage extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            "isLoading": true,
+            "error": false,
+            "categories": []
+        };
+    }
+        
+    componentDidMount() {
+        const self = this;
+        const route = baseApiUrl + "/categories/alltags/";
+        axios.get(route).then(function(response) {
+            self.setState({
+                "isLoading": false,
+                "error": false,
+                "categories": response.data
+            });
+        }).catch(function(error) {
+            self.setState({
+                "isLoading": false,
+                "error": true,
+                "categories": []
+            });
+        });
+    }
+    
+    renderCategories(categories) {
+        const self = this;
+        const out = categories.map(function(category, i) {
+            const tags=category.tags.map(function(tag){
+                return { key:tag.id, value: tag.id, text: tag.title };
+            })
+            return (
+                <Form.Field> 
+                    <label>{category.title}</label>
+                    <Dropdown placeholder='State' fluid multiple search selection options={tags} />
+                </Form.Field>  
+            );
+        });
+        return out;
+    }
+        
+        
+        
         render(){
             return (
                 <Modal trigger={<Icon name='plus' size='big'/> } >
@@ -29,7 +76,9 @@ export default class NouveauMaillage extends Component{
                                     <label>Nombre de sommets</label>
                                     <input placeholder='Nombre de cellule' />
                                 </Form.Field>
+                                {this.renderCategories(this.state.categories)}
                                 <Button type='submit'>Submit</Button>
+                                
                             </Form>
                         </Container>
                     </Modal.Description>
