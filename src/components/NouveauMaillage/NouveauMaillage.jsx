@@ -1,10 +1,8 @@
 import { baseApiUrl } from "../../conf";
 import React from "react";
-import {Component} from "react";
-import { Button, Header, Image, Modal, Icon, Form, Checkbox, Container, TextArea, Dropdown } from 'semantic-ui-react';
+import { Component } from "react";
+import { Button, Modal, Icon, Form, Container, TextArea, Dropdown, Header, Divider } from 'semantic-ui-react';
 import axios from "axios";
-
-
 
 export default class NouveauMaillage extends Component{
     constructor(props) {
@@ -35,65 +33,64 @@ export default class NouveauMaillage extends Component{
     }
     
     renderCategories(categories) {
-        const self = this;
-        const out = categories.map(function(category, i) {
-            const tags=category.tags.map(function(tag){
-                return { key:tag.id, value: tag.id, text: tag.title };
-            })
+        if (categories.length > 0) {
+            const out = categories.map(function(category, i) {
+                if (category.tags.length > 0) {
+                    const tags = category.tags.map(function(tag) {
+                        return { key:tag.id, value: tag.id, text: tag.title };
+                    });
+                    return (
+                        <Form.Field key={i}> 
+                            <label>{category.title}</label>
+                            <Dropdown placeholder={category.title} fluid multiple selection options={tags} />
+                        </Form.Field>  
+                    );
+                }
+            });
             return (
-                <Form.Field> 
-                    <label>{category.title}</label>
-                    <Dropdown placeholder='State' fluid multiple search selection options={tags} />
-                </Form.Field>  
+                <Container fluid>
+                    <Header dividing size="small"><Icon name="tags" />Tags</Header>
+                    {out}
+                </Container>
             );
-        });
-        return out;
-    }
-        
-        
-        
-        render(){
-            return (
-                <Modal trigger={<Icon name='plus' size='big'/> } >
-                <Modal.Header>Partager un nouveau maillage</Modal.Header>
-                <Modal.Content>
-                    <Modal.Description>
-                        <Container textAlign='justified'>
-                            <Form>
-                                <Form.Field>
-                                    <label>Titre</label>
-                                    <input placeholder='Titre' />
-                                </Form.Field>
-                                <Form.Field>
-                                    <label>Description</label>
-                                    <TextArea placeholder='Description' />
-                                </Form.Field>
-                                <Form.Field>
-                                    <label>Nombre de cellules</label>
-                                    <input placeholder='Nombre de cellule' />
-                                </Form.Field>
-                                <Form.Field>
-                                    <label>Nombre de sommets</label>
-                                    <input placeholder='Nombre de cellule' />
-                                </Form.Field>
-                                {this.renderCategories(this.state.categories)}
-                                <Button type='submit' ><Icon name='save'/>Enregistrer </Button>
-                                
-                            </Form>
-                        </Container>
-                    </Modal.Description>
-                </Modal.Content>
-                  
-                </Modal>
-  )
         }
-        
+    }
+
+    render(){
+        return (
+            <Modal trigger={this.props.children} closeIcon>
+                <Modal.Header><Icon name="file" /> Partager un nouveau maillage</Modal.Header>
+                <Modal.Content>
+                    <Form>
+                        <Container fluid>
+                            <Header dividing size="small">Informations générales</Header>
+                            <Form.Field required>
+                                <label>Titre</label>
+                                <input placeholder='Titre' />
+                            </Form.Field>
+                            <Form.Field>
+                                <label>Description</label>
+                                <TextArea placeholder='Description' autoHeight />
+                            </Form.Field>
+                            <Form.Group widths="equal">
+                                <Form.Field required>
+                                    <label>Nombre de cellules</label>
+                                    <input placeholder='Nombre de cellules' />
+                                </Form.Field>
+                                <Form.Field required>
+                                    <label>Nombre de sommets</label>
+                                    <input placeholder='Nombre de sommets' />
+                                </Form.Field>
+                            </Form.Group>
+                        </Container>
+                        <Divider hidden />
+                        {this.renderCategories(this.state.categories)}
+                    </Form>
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button primary type='submit'><Icon name='save'/>Enregistrer</Button>
+                </Modal.Actions>
+            </Modal>
+        );
+    }    
 }
-    
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
