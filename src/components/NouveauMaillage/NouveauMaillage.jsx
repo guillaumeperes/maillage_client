@@ -66,7 +66,7 @@ export default class NouveauMaillage extends Component{
                             <Header dividing size="small">Informations générales</Header>
                             <Form.Field required>
                                 <label>Titre</label>
-                                <input placeholder='Titre' />
+                                <input type="text" placeholder='Titre' />
                             </Form.Field>
                             <Form.Field>
                                 <label>Description</label>
@@ -75,11 +75,11 @@ export default class NouveauMaillage extends Component{
                             <Form.Group widths="equal">
                                 <Form.Field required>
                                     <label>Nombre de cellules</label>
-                                    <input placeholder='Nombre de cellules' />
+                                    <input type="number" placeholder='Nombre de cellules' />
                                 </Form.Field>
                                 <Form.Field required>
                                     <label>Nombre de sommets</label>
-                                    <input placeholder='Nombre de sommets' />
+                                    <input type="number" placeholder='Nombre de sommets' />
                                 </Form.Field>
                             </Form.Group>
                         </Container>
