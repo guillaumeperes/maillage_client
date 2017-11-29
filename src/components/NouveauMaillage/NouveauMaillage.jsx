@@ -35,17 +35,15 @@ export default class NouveauMaillage extends Component{
     renderCategories(categories) {
         if (categories.length > 0) {
             const out = categories.map(function(category, i) {
-                if (category.tags.length > 0) {
-                    const tags = category.tags.map(function(tag) {
-                        return { key:tag.id, value: tag.id, text: tag.title };
-                    });
-                    return (
-                        <Form.Field key={i}> 
-                            <label>{category.title}</label>
-                            <Dropdown placeholder={category.title} fluid multiple selection options={tags} />
-                        </Form.Field>  
-                    );
-                }
+                const tags = category.tags.map(function(tag) {
+                    return { key:tag.id, value: tag.id, text: tag.title };
+                });
+                return (
+                    <Form.Field key={i}> 
+                        <label>{category.title}</label>
+                        <Dropdown placeholder={category.title} fluid multiple selection options={tags} />
+                    </Form.Field>  
+                );
             });
             return (
                 <Container fluid>
@@ -54,6 +52,7 @@ export default class NouveauMaillage extends Component{
                 </Container>
             );
         }
+        return null;
     }
 
     render(){
