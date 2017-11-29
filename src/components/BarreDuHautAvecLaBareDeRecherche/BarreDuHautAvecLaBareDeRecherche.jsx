@@ -1,49 +1,69 @@
 import React from "react";
-import {Component} from "react";
-import { Dropdown, Icon, Menu } from 'semantic-ui-react'
+import { Component } from "react";
+import { Dropdown, Icon, Menu } from "semantic-ui-react";
+import LoginModal from "../LoginModal/LoginModal";
+import PropTypes from "prop-types";
+import { withRouter } from "react-router-dom";
 import "./BarreDuHautAvecLaBareDeRecherche.css";
-import NouveauMaillage from "../NouveauMaillage/NouveauMaillage"
-import Recherche from "../Recherche/Recherche"
 
+class BarreDuHautAvecLaBareDeRecherche extends Component {
+    static propTypes = {
+        "match": PropTypes.object.isRequired,
+        "location": PropTypes.object.isRequired,
+        "history": PropTypes.object.isRequired
+    };
 
-export default class BarreDuHautAvecLaBareDeRecherche extends Component{
-        render(){
-            return(
-                    <Menu borderless fixed="top" fluid className="BarreDuHautAvecLaBareDeRecherche">
-                    <Menu.Item>
-                        <Icon name='home' size='big' onClick={this.clicHome} />
-                        <Dropdown icon={<Icon name='setting' size='big' />} className='link item'>  
-                            <Dropdown.Menu>
-                                    <Dropdown.Item onClick={this.clicGestUser}>Gestion des Utilisateurs</Dropdown.Item>
-                                    <Dropdown.Item onClick={this.clicGestTag}>Gestion des Tags</Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                        <NouveauMaillage />
-                        <Recherche />
-                    </Menu.Item>
-                    </Menu>);
+    constructor(props) {
+        super(props);
+        this.clicHome = this.clicHome.bind(this);
+        this.clicGestUser = this.clicGestUser.bind(this);
+        this.clicGestTag = this.clicGestTag.bind(this);
+    }
+
+    render() {
+        return (
+            <Menu fixed="top" size="small" borderless fluid className="BarreDuHautAvecLaBareDeRecherche">
+                <Menu.Item header link onClick={this.clicHome}>
+                    <Icon name="fort awesome" size="big" />Le Château Fort
+                </Menu.Item>
+                <Dropdown item icon={<Icon link name="settings" size="large" />}>
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={this.clicGestUser}><Icon name="users" /> Gestion des utilisateurs</Dropdown.Item>
+                        <Dropdown.Item onClick={this.clicGestTag}><Icon name="tags" /> Gestion des tags</Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
+                <Menu.Menu position="right">
+                    <LoginModal>
+                        <Menu.Item link>
+                            <Icon size="large" name="user" /> Connexion
+                        </Menu.Item>
+                    </LoginModal>
+                </Menu.Menu>
+            </Menu>
+        );
+    }
+
+    clicGestUser(e) {
+        e.preventDefault();
+        if (this.props.location.pathname !== "/admin/users") {
+            this.props.history.push("/admin/users");
         }
-        
-        clicGestUser(){
-            console.log("page de gestion des parametre utilisateur/ page accessible par l'admin")
+    }
+
+    clicGestTag(e) {
+        e.preventDefault();
+        if (this.props.location.pathname !== "/admin/tags") {
+            this.props.history.push("/admin/tags");
         }
-        
-        clicGestTag(){
-            console.log("page de gestion des tag utilisable par les utilisateurs/ page accessible par l'admin")
+    }
+
+    clicHome(e) {
+        e.preventDefault();
+        if (this.props.location.pathname !== "/") {
+            this.props.history.push("/");
         }
-        
-        clicHome(){
-            console.log("page d'accueil")
-        }
-        
-        
+    }
 }
 
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
+BarreDuHautAvecLaBareDeRecherche = withRouter(BarreDuHautAvecLaBareDeRecherche);
+export default BarreDuHautAvecLaBareDeRecherche;
