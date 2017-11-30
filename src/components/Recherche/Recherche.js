@@ -17,7 +17,7 @@ export default class Recherche extends Component{
     
     render(){
         return (
-                <Input icon={{ name: 'search', circular: true, link: true }} placeholder='Search...' > 
+                <Input fluid icon={{ name: 'search', circular: true, link: true }} placeholder='Search...' > 
                 </Input>
         )
     }

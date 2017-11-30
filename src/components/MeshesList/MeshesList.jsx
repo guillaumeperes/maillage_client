@@ -9,12 +9,17 @@ import { Icon } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
 import { Dropdown } from "semantic-ui-react";
+import { Button } from "semantic-ui-react";
+import { Responsive } from "semantic-ui-react";
+import { Divider } from "semantic-ui-react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import filesize from "filesize";
 import EditMeshModal from "../EditMeshModal/EditMeshModal";
 import ViewMeshModal from "../ViewMeshModal/ViewMeshModal";
+import NouveauMaillage from "../NouveauMaillage/NouveauMaillage";
+import Recherche from "../Recherche/Recherche";
 import { connect } from "react-redux";
 import "./MeshesList.css";
 
@@ -182,45 +187,72 @@ class MeshesList extends Component {
     }
 
     render() {
+        let mainContent = null; // contenu principal (icône de chargement en cours, liste de fichiers de maillage, etc.)
+
         if (this.state.listLoading) {
-            return (
-                <Dimmer.Dimmable as="div" className="MeshesList">
+            mainContent = (
+                <Dimmer.Dimmable as="div">
                     <Dimmer active inverted className="MeshesList-loader">
                         <Loader size="medium" inverted>Chargement en cours</Loader>
                     </Dimmer>
                 </Dimmer.Dimmable>
             );
         } else if (this.state.meshes.length === 0) {
-            return (
-                <div className="MeshesList">
-                    <Container textAlign="center" text>
-                        <Icon name="search" size="huge" color="grey" />
-                        <div>Aucun résulat.</div>
-                    </Container>
-                </div>
+            mainContent = (
+                <Container textAlign="center" text className="MeshesList-empty">
+                    <Icon name="search" size="huge" color="grey" />
+                    <div>Aucun résulat.</div>
+                </Container>
             );
         } else {
-            return (
-                <div className="MeshesList">
-                    <Grid padded stackable columns={2} className="MeshesList-meta">
-                        <Grid.Row>
-                            <Grid.Column width={8} textAlign="left">
-                                <span className="MeshesList-metaSortLabel">Trier par :</span>
-                                { this.renderSortDropdown() }
-                            </Grid.Column>
-                            <Grid.Column width={8} textAlign="right">
-                                <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
-                    <Scrollbars style={{ width: "calc(100% - 10px)", height: "calc(100% - 100px)" }}>
-                        <Grid padded columns={4} className="MeshesList-list">
-                            { this.renderMeshes() }
-                        </Grid>
-                    </Scrollbars>
+            mainContent = (
+                <div>
+                    <Divider hidden />
+                    <Grid padded columns={4}>{ this.renderMeshes() }</Grid>
                 </div>
             );
         }
+
+        return (
+            <div className="MeshesList">
+                <Scrollbars style={{ width: "100%", height: "calc(100% - 50px)" }}>
+                    <div className="MeshesList-scroller">
+                        <Responsive maxWidth={992}>
+                            <Container fluid textAlign="center">
+                                <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
+                            </Container>
+                        </Responsive>
+                        <Responsive minWidth={993}>
+                            <Container fluid textAlign="right">
+                                <NouveauMaillage><Button primary icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
+                            </Container>
+                        </Responsive>
+                        <Divider hidden />
+                        <Container fluid>
+                            <Recherche />
+                        </Container>
+                        <Divider hidden />
+                        <Responsive maxWidth={992}>
+                            <Container fluid textAlign="center">
+                                <div><strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span></div>
+                                <div><span className="MeshesList-metaSortLabel">Trier par :</span>{ this.renderSortDropdown() }</div>
+                            </Container>
+                        </Responsive>
+                        <Responsive minWidth={993}>
+                            <Grid columns={2}>
+                                <Grid.Column width={8} textAlign="left">
+                                    <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
+                                </Grid.Column>
+                                <Grid.Column width={8} textAlign="right">
+                                    <span className="MeshesList-metaSortLabel">Trier par :</span>{ this.renderSortDropdown() }
+                                </Grid.Column>
+                            </Grid>
+                        </Responsive>
+                        { mainContent }
+                    </div>
+                </Scrollbars>
+            </div>
+        );
     }
 }
 

@@ -1,13 +1,13 @@
 .MeshesList {
     position: fixed;
     width: calc(100% - 460px);
+    padding: 20px 5px 0 10px !important;
     height: 100%;
     top: 50px;
     left: 230px;
 }
-.MeshesList-meta {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
+.MeshesList-scroller {
+    margin-right: 15px !important;
 }
 .MeshesList-metaSortLabel {
     margin-right: 10px;
@@ -22,11 +22,10 @@
 }
 .MeshesList-loader {
     background-color: #f9f7f7 !important;
-    margin-top: 40px;
+    margin-top: 60px;
 }
-.MeshesList-list {
-    margin-right: 10px !important;
-    padding: 5px 20px 20px 20px !important;
+.MeshesList-empty {
+    margin-top: 60px;
 }
 .MeshesList-mesh {
     margin: 0 0 10px 0 !important;
@@ -74,6 +73,15 @@
 }
 .MeshesList-mesh .MeshesList-meshDigit {
     font-weight: bold;
+}
+@media (max-width: 768px) {
+    .MeshesList {
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+    }
+    .MeshesList-scroller {
+        margin-right: 0 !important;
+    }
 }
 @media (max-width: 992px) {
     .MeshesList {
