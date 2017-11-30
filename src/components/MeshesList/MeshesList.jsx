@@ -220,17 +220,22 @@ class MeshesList extends Component {
                         <Responsive maxWidth={992}>
                             <Container fluid textAlign="center">
                                 <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
+                                <Divider hidden />
+                                <Recherche />
                             </Container>
                         </Responsive>
                         <Responsive minWidth={993}>
-                            <Container fluid textAlign="right">
-                                <NouveauMaillage><Button primary icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
-                            </Container>
+                            <Grid columns={2}>
+                                <Grid.Row>
+                                    <Grid.Column width={11}>
+                                        <Recherche />
+                                    </Grid.Column>
+                                    <Grid.Column width={5} textAlign="right">
+                                        <NouveauMaillage><Button primary icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
+                                    </Grid.Column>
+                                </Grid.Row>
+                            </Grid>
                         </Responsive>
-                        <Divider hidden />
-                        <Container fluid>
-                            <Recherche />
-                        </Container>
                         <Divider hidden />
                         <Responsive maxWidth={992}>
                             <Container fluid textAlign="center">
@@ -241,10 +246,10 @@ class MeshesList extends Component {
                         <Responsive minWidth={993}>
                             <Grid columns={2}>
                                 <Grid.Column width={8} textAlign="left">
-                                    <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
+                                    <span className="MeshesList-metaSortLabel">Trier par :</span>{ this.renderSortDropdown() }
                                 </Grid.Column>
                                 <Grid.Column width={8} textAlign="right">
-                                    <span className="MeshesList-metaSortLabel">Trier par :</span>{ this.renderSortDropdown() }
+                                    <strong>{this.state.meshes.length}</strong> <span className="MeshesList-metaCountLabel">fichiers trouvés</span>
                                 </Grid.Column>
                             </Grid>
                         </Responsive>
