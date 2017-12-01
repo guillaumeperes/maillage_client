@@ -9,7 +9,6 @@ import { Icon } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
 import { Dropdown } from "semantic-ui-react";
-import { Button } from "semantic-ui-react";
 import { Responsive } from "semantic-ui-react";
 import { Divider } from "semantic-ui-react";
 import { Scrollbars } from "react-custom-scrollbars";
@@ -18,7 +17,6 @@ import axios from "axios";
 import filesize from "filesize";
 import EditMeshModal from "../EditMeshModal/EditMeshModal";
 import ViewMeshModal from "../ViewMeshModal/ViewMeshModal";
-import NouveauMaillage from "../NouveauMaillage/NouveauMaillage";
 import Recherche from "../Recherche/Recherche";
 import { connect } from "react-redux";
 import "./MeshesList.css";
@@ -217,25 +215,7 @@ class MeshesList extends Component {
             <div className="MeshesList">
                 <Scrollbars style={{ width: "100%", height: "calc(100% - 50px)" }}>
                     <div className="MeshesList-scroller">
-                        <Responsive maxWidth={992}>
-                            <Container fluid textAlign="center">
-                                <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
-                                <Divider hidden />
-                                <Recherche />
-                            </Container>
-                        </Responsive>
-                        <Responsive minWidth={993}>
-                            <Grid columns={2}>
-                                <Grid.Row>
-                                    <Grid.Column width={11}>
-                                        <Recherche />
-                                    </Grid.Column>
-                                    <Grid.Column width={5} textAlign="right">
-                                        <NouveauMaillage><Button primary icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
-                                    </Grid.Column>
-                                </Grid.Row>
-                            </Grid>
-                        </Responsive>
+                        <Recherche />
                         <Divider hidden />
                         <Responsive maxWidth={992}>
                             <Container fluid textAlign="center">

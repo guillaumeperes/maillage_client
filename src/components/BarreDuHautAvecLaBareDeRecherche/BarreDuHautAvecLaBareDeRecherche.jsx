@@ -22,7 +22,7 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
 
     render() {
         return (
-            <Menu fixed="top" size="small" borderless fluid className="BarreDuHautAvecLaBareDeRecherche">
+            <Menu fixed="top" size="small" borderless fluid color="grey" inverted className="BarreDuHautAvecLaBareDeRecherche">
                 <Menu.Item header link onClick={this.clicHome}>
                     <Icon name="fort awesome" size="big" />Le Château Fort
                 </Menu.Item>

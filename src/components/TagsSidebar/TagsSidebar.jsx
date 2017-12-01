@@ -4,13 +4,15 @@ import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import { Checkbox } from "semantic-ui-react";
 import { Header } from "semantic-ui-react";
-import { Icon } from "semantic-ui-react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { connect } from "react-redux";
 import { addFilter } from "../../actions.js";
 import { removeFilter } from "../../actions.js";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
+import { Divider } from "semantic-ui-react";
+import { Button } from "semantic-ui-react";
+import NouveauMaillage from "../NouveauMaillage/NouveauMaillage";
 import "./TagsSidebar.css";
 
 class TagsSidebar extends Component {
@@ -115,7 +117,8 @@ class TagsSidebar extends Component {
         if (this.state.isLoading) {
             return (
                 <div className="TagsSidebar">
-                    <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
+                    <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
+                    <Divider hidden />
                     <div className="TagsSidebar-loader">
                         <Dimmer.Dimmable as="div">
                             <Dimmer active inverted>
@@ -125,20 +128,12 @@ class TagsSidebar extends Component {
                     </div>
                 </div>
             );
-        } else if (this.state.categories.length === 0) {
-            return (
-                <div className="TagsSidebar">
-                    <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
-                    <div className="TagsSidebar-empty">
-                        Aucun filtre n'est disponnible.
-                    </div>
-                </div>
-            );
         } else {
             return (
                 <div className="TagsSidebar">
-                    <div className="TagsSidebar-title"><Icon name="filter" />Filtrer par</div>
-                    <Scrollbars style={{ width: "100%", height: "calc(100% - 100px)" }}>
+                    <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
+                    <Divider hidden />
+                    <Scrollbars style={{ width: "100%", height: "calc(100% - 95px)" }}>
                         <div className="TagsSidebar-list">
                             { this.renderCategories(this.state.categories) }
                         </div>

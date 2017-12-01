@@ -1,32 +1,16 @@
 .TagsSidebar {
-    background-color: #ecebeb;
-    border-right: 1px solid #afafaf;
     position: fixed;
-    width: 230px;
+    width: 250px;
     height: 100%;
     top: 50px;
+    padding: 20px 5px 20px 15px;
 }
 .TagsSidebar .TagsSidebar-loader {
-    margin-top: 40px;
-}
-.TagsSidebar .TagsSidebar-empty {
-    margin-top: 10px;
-    padding: 0 10px 15px 10px;
-    color: #6f6d6d;
-    font-size: 13px;
-}
-.TagsSidebar .TagsSidebar-title {
-    text-align: center;
-    text-transform: uppercase;
-    background-color: #c5c5c5;
-    font-weight: bold;
-    padding: 15px 0 15px 0;
-    border-bottom: 1px solid #afafaf;
-    font-size: 13px;
-    color: #545454;
+    margin-top: 50px;
 }
 .TagsSidebar .TagsSidebar-list {
-    padding: 0 10px 15px 10px;
+    padding-right: 10px;
+    padding-bottom: 20px;
 }
 .TagsSidebar .TagsSidebar-list .checkbox label {
     font-size: 13px;

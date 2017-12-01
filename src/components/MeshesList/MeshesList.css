@@ -1,10 +1,10 @@
 .MeshesList {
     position: fixed;
-    width: calc(100% - 460px);
+    width: calc(100% - 480px);
     padding: 20px 5px 0 10px !important;
     height: 100%;
     top: 50px;
-    left: 230px;
+    left: 250px;
 }
 .MeshesList-scroller {
     margin-right: 15px !important;
@@ -74,17 +74,8 @@
 .MeshesList-mesh .MeshesList-meshDigit {
     font-weight: bold;
 }
-@media (max-width: 768px) {
-    .MeshesList {
-        padding-right: 0 !important;
-        padding-left: 0 !important;
-    }
-    .MeshesList-scroller {
-        margin-right: 0 !important;
-    }
-}
 @media (max-width: 992px) {
     .MeshesList {
-        width: calc(100% - 230px);
+        width: calc(100% - 250px);
     }
 }
