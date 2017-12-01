@@ -117,7 +117,7 @@ export default class ViewMeshModal extends Component {
     render() {
         if (this.state.isLoading) {
             return (
-                <Modal onOpen={this.loadMesh} open={this.state.isOpened} trigger={this.props.children}>
+                <Modal onOpen={this.loadMesh} open={this.state.isOpened} onClose={this.closeModal} trigger={this.props.children} closeIcon>
                     <Modal.Header>Chargement en cours</Modal.Header>
                     <Modal.Content>
                          <Segment textAlign="center" vertical padded>
@@ -135,7 +135,7 @@ export default class ViewMeshModal extends Component {
             );
         } else if (this.state.error) {
             return (
-                <Modal onOpen={this.loadMesh} open={this.state.isOpened} trigger={this.props.children}>
+                <Modal onOpen={this.loadMesh} open={this.state.isOpened} onClose={this.closeModal} trigger={this.props.children} closeIcon>
                     <Modal.Header>Une erreur s'est produite</Modal.Header>
                     <Modal.Content>
                         <Grid padded stackable columns={2}>
@@ -170,7 +170,7 @@ export default class ViewMeshModal extends Component {
             });
 
             return (
-                <Modal onOpen={this.loadMesh} open={this.state.isOpened} trigger={this.props.children}>
+                <Modal onOpen={this.loadMesh} open={this.state.isOpened} onClose={this.closeModal} trigger={this.props.children} closeIcon>
                     <Modal.Header>
                         <Grid stackable columns={2}>
                             <Grid.Row only="mobile">
