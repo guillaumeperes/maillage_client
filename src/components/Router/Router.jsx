@@ -7,6 +7,8 @@ import HomePage from "../HomePage/HomePage";
 import AdminTagsPage from "../AdminTagsPage/AdminTagsPage";
 import AdminUsersPage from "../AdminUsersPage/AdminUsersPage";
 import PageNotFound from "../PageNotFound/PageNotFound";
+import LoginPage from "../LoginPage/LoginPage";
+import RegisterPage from "../RegisterPage/RegisterPage";
 
 export default class Router extends Component {
     render() {
@@ -14,6 +16,8 @@ export default class Router extends Component {
             <BrowserRouter>
                 <Switch>
                     <Route exact path="/" component={HomePage} />
+                    <Route exact path="/login" component={LoginPage} />
+                    <Route exact path="/register" component={RegisterPage} />
                     <Route exact path="/admin/tags/" component={AdminTagsPage} />
                     <Route exact path="/admin/users/" component={AdminUsersPage} />
                     <Route component={PageNotFound} />

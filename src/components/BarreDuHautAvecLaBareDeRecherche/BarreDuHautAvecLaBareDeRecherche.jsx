@@ -1,7 +1,6 @@
 import React from "react";
 import { Component } from "react";
 import { Dropdown, Icon, Menu } from "semantic-ui-react";
-import LoginModal from "../LoginModal/LoginModal";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
 import "./BarreDuHautAvecLaBareDeRecherche.css";
@@ -18,6 +17,7 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
         this.clicHome = this.clicHome.bind(this);
         this.clicGestUser = this.clicGestUser.bind(this);
         this.clicGestTag = this.clicGestTag.bind(this);
+        this.clicLogin = this.clicLogin.bind(this);
     }
 
     render() {
@@ -33,14 +33,19 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
                     </Dropdown.Menu>
                 </Dropdown>
                 <Menu.Menu position="right">
-                    <LoginModal>
-                        <Menu.Item link>
-                            <Icon size="large" name="user" /> Connexion
-                        </Menu.Item>
-                    </LoginModal>
+                    <Menu.Item link onClick={this.clicLogin}>
+                        <Icon size="large" name="user" /> Se connecter
+                    </Menu.Item>
                 </Menu.Menu>
             </Menu>
         );
+    }
+
+    clicLogin(e) {
+        e.preventDefault();
+        if (this.props.location.pathname !== "/login") {
+            this.props.history.push("/login");
+        }
     }
 
     clicGestUser(e) {
