@@ -1,3 +1,8 @@
-.RegisterPage-content {
+.RegisterPage .RegisterPage-content {
     margin-top: 70px !important;
+}
+.RegisterPage .RegisterPage-footer {
+    margin-top: 100px !important;
+    padding-top: 50px !important;
+    padding-bottom: 180px !important;
 }

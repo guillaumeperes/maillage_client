@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "axios": "0.17.*",
+    "email-validator": "^1.1.1",
     "filesize": "3.5.*",
     "prop-types": "15.6.*",
     "react": "16.*",
