@@ -1,4 +1,5 @@
 const initialStore = {
-    "selectedFilters": []
+    "selectedFilters": [],
+    "userToken": null
 };
 export default initialStore;
