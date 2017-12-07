@@ -14,13 +14,19 @@ class App extends Component {
         "cookies": PropTypes.object.isRequired,
     };
 
+    componentWillMount() {
+        const cookieToken = this.props.cookies.get("maillage_userToken");
+        if (cookieToken) {
+            this.props.setUserTokenOnStore(cookieToken);
+        }
+    }
+
     componentDidMount() {
         const self = this;
-        const cookieToken = self.props.cookies.get("maillage_userToken");
-        if (cookieToken) {
+        if (self.props.userToken) {
             const route = baseApiUrl + "/user/revive";
             const params = {
-                "token": cookieToken
+                "token": self.props.userToken
             };
             axios.get(route, {"params": params}).then(function(result) {
                 let expire = new Date();
@@ -47,7 +53,9 @@ class App extends Component {
 }
 
 const mapStoreToProps = function(store) {
-    return {};
+    return {
+        "userToken": store.users.userToken
+    };
 };
 
 const mapDispatchToProps = function(dispatch) {
