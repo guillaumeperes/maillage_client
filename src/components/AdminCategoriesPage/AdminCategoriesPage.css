@@ -1,0 +1,11 @@
+.AdminCategoriesPage .AdminCategoriesPage-content {
+    margin-top: 70px !important;
+}
+.AdminCategoriesPage .AdminCategoriesPage-loader {
+    margin-top: 70px;
+}
+.AdminCategoriesPage .AdminCategoriesPage-footer {
+    margin-top: 150px !important;
+    padding-top: 50px !important;
+    padding-bottom: 180px !important;
+}

@@ -20,7 +20,7 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
         super(props);
         this.clicHome = this.clicHome.bind(this);
         this.clicGestUser = this.clicGestUser.bind(this);
-        this.clicGestTag = this.clicGestTag.bind(this);
+        this.clicGestCategories = this.clicGestCategories.bind(this);
         this.clicLogin = this.clicLogin.bind(this);
         this.clicLogout = this.clicLogout.bind(this);
     }
@@ -47,8 +47,8 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
                 </Menu.Item>
                 <Dropdown item icon={<Icon link name="settings" size="large" />}>
                     <Dropdown.Menu>
+                        <Dropdown.Item onClick={this.clicGestCategories}><Icon name="tags" /> Gestion des catégories</Dropdown.Item>
                         <Dropdown.Item onClick={this.clicGestUser}><Icon name="users" /> Gestion des utilisateurs</Dropdown.Item>
-                        <Dropdown.Item onClick={this.clicGestTag}><Icon name="tags" /> Gestion des tags</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
                 <Menu.Menu position="right">
@@ -78,10 +78,10 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
         }
     }
 
-    clicGestTag(e) {
+    clicGestCategories(e) {
         e.preventDefault();
-        if (this.props.location.pathname !== "/admin/tags") {
-            this.props.history.push("/admin/tags");
+        if (this.props.location.pathname !== "/admin/categories") {
+            this.props.history.push("/admin/categories");
         }
     }
 
