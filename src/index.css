@@ -4,3 +4,6 @@ body {
   height: auto !important;
   background-color: #f0f1f3!important;
 }
+.swal-text {
+    text-align: center;
+}

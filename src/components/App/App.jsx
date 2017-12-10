@@ -11,24 +11,16 @@ import { setUserToken } from "../../actions.js";
 
 class App extends Component {
     static propTypes = {
-        "cookies": PropTypes.object.isRequired,
+        "cookies": PropTypes.object.isRequired
     };
 
     componentWillMount() {
         const cookieToken = this.props.cookies.get("maillage_userToken");
         if (cookieToken) {
             this.props.setUserTokenOnStore(cookieToken);
-        }
-    }
-
-    componentDidMount() {
-        const self = this;
-        if (self.props.userToken) {
-            const route = baseApiUrl + "/user/revive";
-            const params = {
-                "token": self.props.userToken
-            };
-            axios.get(route, {"params": params}).then(function(result) {
+            const self = this;
+            const route = baseApiUrl + "/user/revive?token=" + cookieToken;
+            axios.get(route).then(function(result) {
                 let expire = new Date();
                 expire.setTime(result.data.data.expiresAt * 1000); // on prend la date d'expiration du token fournie par l'api
                 self.props.cookies.set("maillage_userToken", result.data.data.token, {
