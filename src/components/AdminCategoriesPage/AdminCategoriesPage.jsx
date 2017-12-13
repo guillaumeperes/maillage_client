@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import swal from "sweetalert";
 import { baseApiUrl } from "../../conf";
 import { connect } from "react-redux";
+import tinycolor from "tinycolor2";
 import "./AdminCategoriesPage.css";
 
 class AdminCategoriesPage extends Component {
@@ -51,7 +52,7 @@ class AdminCategoriesPage extends Component {
 
     componentDidMount() {
         const self = this;
-        const route = baseApiUrl + "/categories/allTags/";
+        const route = baseApiUrl + "/categories/alltags/";
         axios.get(route).then(function(response) {
             self.setState({
                 "isLoading": false,
@@ -90,6 +91,13 @@ class AdminCategoriesPage extends Component {
             return c.id === category.id;
         });
         categories.splice(index, 1, category);
+        categories.sort(function(a, b) {
+            let c = a.title.localeCompare(b.title);
+            if (c === 0) {
+                c = a.id < b.id ? -1 : 1;
+            }
+            return c;
+        });
         const state = Object.assign({}, this.state, {
             "categories": categories
         });
@@ -124,7 +132,7 @@ class AdminCategoriesPage extends Component {
                     self.setState(state);
                     toast.success("La categorie a été supprimée avec succès.");
                 }).catch(function(error) {
-                    if (error.response !== null) {
+                    if (error.response != null) {
                         self.throwSweetError(error.response.data.error);
                     } else {
                         self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
@@ -137,7 +145,7 @@ class AdminCategoriesPage extends Component {
     handleNewTag(category, tag) {
         let categories = this.state.categories;
         const cindex = categories.findIndex(function(c) {
-            return c.id == category.id;
+            return c.id === category.id;
         });
         categories[cindex].tags.push(tag);
         categories[cindex].tags.sort(function(a, b) {
@@ -157,12 +165,19 @@ class AdminCategoriesPage extends Component {
     handleEditTag(category, tag) {
         let categories = this.state.categories;
         const cindex = categories.findIndex(function(c) {
-            return c.id == category.id;
+            return c.id === category.id;
         });
         const tindex = categories[cindex].tags.findIndex(function(t) {
-            return t.id == tag.id;
+            return t.id === tag.id;
         });
         categories[cindex].tags.splice(tindex, 1, tag);
+        categories[cindex].tags.sort(function(a, b) {
+            let c = a.title.localeCompare(b.title);
+            if (c === 0) {
+                c = a.id < b.id ? -1 : 1;
+            }
+            return c;
+        });
         const state = Object.assign({}, this.state, {
             "categories": categories
         });
@@ -189,7 +204,7 @@ class AdminCategoriesPage extends Component {
                     const cindex = categories.findIndex(function(c) {
                         return c.id === categoryId;
                     });
-                    const tagindex = categories[cindex].findIndex(function(t) {
+                    const tagindex = categories[cindex].tags.findIndex(function(t) {
                         return t.id === tagId;
                     });
                     categories[cindex].tags.splice(tagindex, 1);
@@ -197,9 +212,9 @@ class AdminCategoriesPage extends Component {
                         "categories": categories
                     });
                     self.setState(state);
-                    toast.success("Le tag a été supprimé avec succès");
+                    toast.success("Le tag a été supprimé avec succès.");
                 }).catch(function(error) {
-                    if (error.response !== null) {
+                    if (error.response != null) {
                         self.throwSweetError(error.response.data.error);
                     } else {
                         self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
@@ -248,14 +263,17 @@ class AdminCategoriesPage extends Component {
                     const tags = category.tags.map(function(tag, i) {
                         return (
                             <List.Item key={i}>
-                                <Grid stackable columns={2} padded={false}>
+                                <Grid stackable columns={2} padded={false} verticalAlign="middle">
                                     <Grid.Row>
-                                        <Grid.Column width={10}>
-                                            <Label style={{ backgroundColor: category.color }}>{tag.title}</Label>
+                                        <Grid.Column width={9}>
+                                            { tinycolor(category.color).isLight() ? <Label style={{ backgroundColor: category.color }} size="medium">{tag.title}</Label> : <Label style={{ backgroundColor: category.color, color: "white" }} size="medium">{tag.title}</Label> }
                                         </Grid.Column>
-                                        <Grid.Column textAlign="right" width={6}>
-                                            {!tag.protected ? <TagModal categoryId={category.id} tagId={tag.id} onSave={self.handleNewTag}><span data-tooltip="Modifier ce tag"><Icon name="pencil" size="large" link /></span></TagModal> : null }
-                                            {!tag.protected ? <span data-tooltip="Supprimer ce tag"><Icon name="trash" size="large" link onClick={self.handleDeleteTag.bind(self, category.id, tag.id)} /></span> : null }
+                                        <Grid.Column width={4}>
+                                            { tag.meshes.length > 0 ? tag.meshes.length + " maillages associés" : null }
+                                        </Grid.Column>
+                                        <Grid.Column textAlign="right" width={3}>
+                                            {!tag.protected ? <TagModal categoryId={category.id} tagId={tag.id} onSave={self.handleEditTag}><span data-tooltip="Modifier ce tag"><Icon name="pencil" size="large" link /></span></TagModal> : null }
+                                            {!tag.protected ? <span data-tooltip="Supprimer ce tag"><Icon name="trash outline" link size="large" onClick={self.handleDeleteTag.bind(self, category.id, tag.id)} /></span> : null }
                                         </Grid.Column>
                                     </Grid.Row>
                                 </Grid>
@@ -267,32 +285,34 @@ class AdminCategoriesPage extends Component {
 
                 return (
                     <div key={i}>
-                        <Accordion.Title index={category.id} active={self.state.activeCategory === category.id} onClick={self.handleOpenCategory}>
-                            <Grid columns={2}>
-                                <Grid.Row>
-                                    <Grid.Column width={12} textAlign="left">
-                                        <Icon name="dropdown" /> {category.title}
-                                    </Grid.Column>
-                                    <Grid.Column width={4} textAlign="right">
-                                        {!category.protected ? <CategoryModal onSave={self.handleEditCategory} categoryId={category.id}><span data-tooltip="Modifier cette catégorie"><Icon name="pencil" size="large" link /></span></CategoryModal> : null }
-                                        {!category.protected ? <span data-tooltip="Supprimer cette catégorie"><Icon name="trash" size="large" link onClick={self.handleDeleteCategory.bind(self, category.id)} /></span> : null }
-                                    </Grid.Column>
-                                </Grid.Row>
-                            </Grid>
+                        <Accordion.Title as={Header} size="small" index={category.id} active={self.state.activeCategory === category.id} onClick={self.handleOpenCategory}>
+                            <Icon name="dropdown" /> {category.title} ({category.tags.length})
                         </Accordion.Title>
                         <Accordion.Content active={self.state.activeCategory === category.id}>
                             {tagsList}
                             <Divider hidden />
                             <TagModal categoryId={category.id} onSave={self.handleNewTag}>
                                 <span>
-                                     <Responsive maxWidth={768}>
+                                     <Responsive as="span" maxWidth={768}>
                                         <Button primary fluid icon="plus" content="Ajouter un tag" labelPosition="left" />
                                     </Responsive>
-                                    <Responsive minWidth={769}>
+                                    <Responsive as="span" minWidth={769}>
                                         <Button primary icon="plus" content="Ajouter un tag" labelPosition="left" />
                                     </Responsive>
                                 </span>
                             </TagModal>
+                            <Responsive as="span" maxWidth={768}>
+                                <span>
+                                    {!category.protected ? <span><Divider hidden /><CategoryModal onSave={self.handleEditCategory} categoryId={category.id}><Button primary fluid icon="pencil" content="Modifier" labelPosition="left" /></CategoryModal></span> : null }
+                                    {!category.protected ? <span><Divider hidden /><Button primary fluid icon="trash outline" content="Supprimer" labelPosition="left" onClick={self.handleDeleteCategory.bind(self, category.id)} /></span> : null }
+                                </span>
+                            </Responsive>
+                            <Responsive as="span" minWidth={769}>
+                                <span>
+                                    {!category.protected ? <CategoryModal onSave={self.handleEditCategory} categoryId={category.id}><Button primary icon="pencil" content="Modifier" labelPosition="left" /></CategoryModal> : null }
+                                    {!category.protected ? <Button primary icon="trash outline" content="Supprimer" labelPosition="left" onClick={self.handleDeleteCategory.bind(self, category.id)} /> : null }
+                                </span>
+                            </Responsive>
                         </Accordion.Content>
                     </div>
                 );
@@ -320,10 +340,10 @@ class AdminCategoriesPage extends Component {
                     <Divider clearing hidden />
                     <CategoryModal onSave={this.handleNewCategory}>
                         <span>
-                            <Responsive maxWidth={768}>
+                            <Responsive as="span" maxWidth={768}>
                                 <Button primary fluid icon="plus" content="Ajouter une catégorie" labelPosition="left" />
                             </Responsive>
-                            <Responsive minWidth={769}>
+                            <Responsive as="span" minWidth={769}>
                                 <Segment vertical floated="right"><Button primary icon="plus" content="Ajouter une catégorie" labelPosition="left" /></Segment>
                             </Responsive>
                         </span>

@@ -115,7 +115,7 @@ class TagModal extends Component {
                 }
                 self.closeModal();
             }).catch(function(error) {
-                if (error.response !== null) {
+                if (error.response != null) {
                     self.throwSweetError(error.response.data.error);
                 } else {
                     self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
@@ -131,7 +131,7 @@ class TagModal extends Component {
                 }
                 self.closeModal();
             }).catch(function(error) {
-                if (error.response !== null) {
+                if (error.response != null) {
                     self.throwSweetError(error.response.data.error);
                 } else {
                     self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");

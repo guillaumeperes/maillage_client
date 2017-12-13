@@ -21,7 +21,8 @@
     "redux": "3.*",
     "semantic-ui-css": "2.2.*",
     "semantic-ui-react": "0.76.*",
-    "sweetalert": "^2.0.8"
+    "sweetalert": "^2.0.8",
+    "tinycolor2": "^1.4.1"
   },
   "devDependencies": {},
   "scripts": {
