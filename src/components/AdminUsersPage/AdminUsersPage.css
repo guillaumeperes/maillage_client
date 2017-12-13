@@ -8,7 +8,13 @@ and open the template in the editor.
     Author     : Sarah Pierson
 */
 
-.AdminUsersPage .AdminUsersPage-table {
-    margin-top: 50px !important;
+.AdminUsersPage .AdminUserPage-content {
+    margin-top: 70px !important;
+}
+
+.AdminUsersPage .AdminUsersPage-footer {
+    margin-top: 150px !important;
+    padding-top: 50px !important;
+    padding-bottom: 180px !important;
 }
 
