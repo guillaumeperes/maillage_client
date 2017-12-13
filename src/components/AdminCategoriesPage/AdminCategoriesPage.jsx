@@ -11,11 +11,11 @@ import { Segment } from "semantic-ui-react";
 import { Button } from "semantic-ui-react";
 import { Grid } from "semantic-ui-react";
 import { Label } from "semantic-ui-react";
-import { Table } from "semantic-ui-react";
 import { List } from "semantic-ui-react";
 import { Accordion } from "semantic-ui-react";
 import BarreDuHautAvecLaBareDeRecherche from "../BarreDuHautAvecLaBareDeRecherche/BarreDuHautAvecLaBareDeRecherche";
 import CategoryModal from "../CategoryModal/CategoryModal";
+import TagModal from "../TagModal/TagModal";
 import axios from "axios";
 import { toast } from "react-toastify";
 import swal from "sweetalert";
@@ -37,7 +37,6 @@ class AdminCategoriesPage extends Component {
         this.handleEditCategory = this.handleEditCategory.bind(this);
         this.handleNewTag = this.handleNewTag.bind(this);
         this.handleEditTag = this.handleEditTag.bind(this);
-        this.handleDeleteTag = this.handleDeleteTag.bind(this);
     }
 
     throwSweetError(message) {
@@ -135,19 +134,79 @@ class AdminCategoriesPage extends Component {
         });
     }
 
-    handleNewTag() {
-        console.log("new tag");
-        // TODO
+    handleNewTag(category, tag) {
+        let categories = this.state.categories;
+        const cindex = categories.findIndex(function(c) {
+            return c.id == category.id;
+        });
+        categories[cindex].tags.push(tag);
+        categories[cindex].tags.sort(function(a, b) {
+            let c = a.title.localeCompare(b.title);
+            if (c === 0) {
+                c = a.id < b.id ? -1 : 1;
+            }
+            return c;
+        });
+        const state = Object.assign({}, this.state, {
+            "categories": categories
+        });
+        this.setState(state);
+        toast.success("Le tag a été créé avec succès.");
     }
 
-    handleEditTag() {
-        console.log("edit tag");
-        // TODO
+    handleEditTag(category, tag) {
+        let categories = this.state.categories;
+        const cindex = categories.findIndex(function(c) {
+            return c.id == category.id;
+        });
+        const tindex = categories[cindex].tags.findIndex(function(t) {
+            return t.id == tag.id;
+        });
+        categories[cindex].tags.splice(tindex, 1, tag);
+        const state = Object.assign({}, this.state, {
+            "categories": categories
+        });
+        this.setState(state);
+        toast.success("Le tag a été modifié avec succès.");
     }
 
-    handleDeleteTag() {
-        console.log("delete tag");
-        // TODO
+    handleDeleteTag(categoryId, tagId, e) {
+        const self = this;
+        swal({
+            "title": "Attention",
+            "text": "Êtes-vous certain de vouloir supprimer ce tag ?",
+            "icon": "warning",
+            "dangerMode": true,
+            "buttons": {
+                "cancel": "Annuler",
+                "delete": "Supprimer"
+            }
+        }).then(function(value) {
+            if (value === "delete") {
+                const route = baseApiUrl + "/tags/" + tagId + "/delete/?token=" + self.props.userToken;
+                axios.delete(route).then(function(result) {
+                    let categories = self.state.categories;
+                    const cindex = categories.findIndex(function(c) {
+                        return c.id === categoryId;
+                    });
+                    const tagindex = categories[cindex].findIndex(function(t) {
+                        return t.id === tagId;
+                    });
+                    categories[cindex].tags.splice(tagindex, 1);
+                    const state = Object.assign({}, self.state, {
+                        "categories": categories
+                    });
+                    self.setState(state);
+                    toast.success("Le tag a été supprimé avec succès");
+                }).catch(function(error) {
+                    if (error.response !== null) {
+                        self.throwSweetError(error.response.data.error);
+                    } else {
+                        self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
+                    }
+                });
+            }
+        });
     }
 
     handleOpenCategory(e, item) {
@@ -184,30 +243,26 @@ class AdminCategoriesPage extends Component {
         } else {
             const self = this;
             const categories = this.state.categories.map(function(category, i) {
-                let tagsList = <p>Aucun tag n'a été créé pour cette catégorie.</p>;
+                let tagsList = <p>Aucun tag n'a été créé pour cette catégorie. Ajoutez des tags en cliquant sur le bouton <em>Ajouter un tag</em>.</p>;
                 if (category.tags.length > 0) {
                     const tags = category.tags.map(function(tag, i) {
                         return (
-                            <Table.Row key={i}>
-                                <Table.Cell><Label style={{ backgroundColor: category.color }}>{tag.title}</Label></Table.Cell>
-                                <Table.Cell>Actions</Table.Cell>
-                            </Table.Row>
+                            <List.Item key={i}>
+                                <Grid stackable columns={2} padded={false}>
+                                    <Grid.Row>
+                                        <Grid.Column width={10}>
+                                            <Label style={{ backgroundColor: category.color }}>{tag.title}</Label>
+                                        </Grid.Column>
+                                        <Grid.Column textAlign="right" width={6}>
+                                            {!tag.protected ? <TagModal categoryId={category.id} tagId={tag.id} onSave={self.handleNewTag}><span data-tooltip="Modifier ce tag"><Icon name="pencil" size="large" link /></span></TagModal> : null }
+                                            {!tag.protected ? <span data-tooltip="Supprimer ce tag"><Icon name="trash" size="large" link onClick={self.handleDeleteTag.bind(self, category.id, tag.id)} /></span> : null }
+                                        </Grid.Column>
+                                    </Grid.Row>
+                                </Grid>
+                            </List.Item>
                         );
                     });
-                    tagsList = (
-                        <div>
-                            <p>Tags associés à cette catégorie :</p>
-                            <Table selectable stackable size="small">
-                                <Table.Header>
-                                    <Table.Row>
-                                        <Table.HeaderCell>Nom</Table.HeaderCell>
-                                        <Table.HeaderCell>Actions</Table.HeaderCell>
-                                    </Table.Row>
-                                </Table.Header>
-                                <Table.Body>{tags}</Table.Body>
-                            </Table>
-                        </div>
-                    );
+                    tagsList = <List divided relaxed>{tags}</List>;
                 }
 
                 return (
@@ -228,12 +283,16 @@ class AdminCategoriesPage extends Component {
                         <Accordion.Content active={self.state.activeCategory === category.id}>
                             {tagsList}
                             <Divider hidden />
-                            <Responsive maxWidth={768}>
-                                <Button primary fluid icon="plus" content="Ajouter un tag" labelPosition="left" onClick={self.handleNewTag} />
-                            </Responsive>
-                            <Responsive minWidth={769}>
-                                <Button primary icon="plus" content="Ajouter un tag" labelPosition="left" onClick={self.handleNewTag} />
-                            </Responsive>
+                            <TagModal categoryId={category.id} onSave={self.handleNewTag}>
+                                <span>
+                                     <Responsive maxWidth={768}>
+                                        <Button primary fluid icon="plus" content="Ajouter un tag" labelPosition="left" />
+                                    </Responsive>
+                                    <Responsive minWidth={769}>
+                                        <Button primary icon="plus" content="Ajouter un tag" labelPosition="left" />
+                                    </Responsive>
+                                </span>
+                            </TagModal>
                         </Accordion.Content>
                     </div>
                 );
