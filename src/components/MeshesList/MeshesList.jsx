@@ -15,7 +15,7 @@ import { Scrollbars } from "react-custom-scrollbars";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import filesize from "filesize";
-import EditMeshModal from "../EditMeshModal/EditMeshModal";
+import NouveauMaillage from "../NouveauMaillage/NouveauMaillage";
 import ViewMeshModal from "../ViewMeshModal/ViewMeshModal";
 import Recherche from "../Recherche/Recherche";
 import { connect } from "react-redux";
@@ -144,7 +144,7 @@ class MeshesList extends Component {
                         <Dropdown icon={<Icon title="Actions" link name="setting" size="large" />}>
                             <Dropdown.Menu className="left">
                                 <ViewMeshModal meshId={mesh.id}><Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item></ViewMeshModal>
-                                <EditMeshModal><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></EditMeshModal>
+                                <NouveauMaillage meshId={mesh.id}><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></NouveauMaillage>
                                 <Dropdown.Divider />
                                 <Dropdown.Item><Icon name="download" />Télécharger</Dropdown.Item>
                                 <Dropdown.Divider />
