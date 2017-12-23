@@ -17,7 +17,6 @@ class App extends Component {
     componentWillMount() {
         const cookieToken = this.props.cookies.get("maillage_userToken");
         if (cookieToken) {
-            this.props.setUserTokenOnStore(cookieToken);
             const self = this;
             const route = baseApiUrl + "/user/revive?token=" + cookieToken;
             axios.get(route).then(function(result) {
