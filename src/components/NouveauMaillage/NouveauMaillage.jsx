@@ -21,6 +21,8 @@ class NouveauMaillage extends Component{
         super(props);
         this.state = {
             "isOpened": false,
+            "isUploading": false,
+            "step": 1,
             "categories": null,
             "mesh": null,
             "data": {}
@@ -30,6 +32,10 @@ class NouveauMaillage extends Component{
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
         this.handleDropdownChange = this.handleDropdownChange.bind(this);
         this.handleSave = this.handleSave.bind(this);
+        this.handleImageDrop = this.handleImageDrop.bind(this);
+        this.handleMeshDrop = this.handleMeshDrop.bind(this);
+        this.handleNextStep = this.handleNextStep.bind(this);
+        this.handlePreviousStep = this.handlePreviousStep.bind(this);
     }
 
     throwSweetError(message) {
@@ -94,6 +100,24 @@ class NouveauMaillage extends Component{
         }
     }
 
+    handleNextStep() {
+        if (this.state.step < 3) {
+            const state = Object.assign({}, this.state, {
+                "step": this.state.step + 1
+            });
+            this.setState(state);
+        }
+    }
+
+    handlePreviousStep() {
+        if (this.state.step > 1) {
+            const state = Object.assign({}, this.state, {
+                "step": this.state.step - 1
+            });
+            this.setState(state);
+        }
+    }
+
     handleTextInputChange(e, data) {
         let o = {};
         o[data.name] = data.value;
@@ -118,43 +142,99 @@ class NouveauMaillage extends Component{
         this.setState(state);
     }
 
+    handleImageDrop(files) {
+        let newImages = this.state.data.newImages || [];
+        files.forEach(function(file) {
+            newImages.push(file);
+        });
+        const state = Object.assign({}, this.state, {
+            "data": Object.assign({}, this.state.data, {
+                "newImages": newImages
+            })
+        });
+        this.setState(state);
+    }
+
+    handleMeshDrop(files) {
+        const state = Object.assign({}, this.state, {
+            "data": Object.assign({}, this.state.data, {
+                "newMesh": files[0]
+            })
+        });
+        this.setState(state);
+    }
+
     handleSave() {
         let data = Object.assign({}, this.state.data);
+        let formData = new FormData();
 
         // Vérification des données
         if (data.title == null || !data.title.length) {
             this.throwSweetError("Merci de renseigner un titre");
             return;
         }
+        formData.append("title", data.title);
         if (data.cells == null || !data.cells.length || /^(0|[1-9]\d*)$/.test(data.cells) === false) {
             this.throwSweetError("Merci de renseigner un nombre de cellules valide.");
             return;
         }
+        formData.append("cells", data.cells);
         if (data.vertices == null || !data.vertices.length || /^(0|[1-9]\d*)$/.test(data.vertices) === false) {
             this.throwSweetError("Merci de renseigner un nombre de sommets valide.");
             return;
+        }
+        formData.append("vertices", data.vertices);
+        if (data.description != null && data.description.length) {
+            formData.append("description", data.description);
         }
         if (data.tags != null && Object.keys(data.tags).length > 0) {
             data.tags = Object.values(data.tags).reduce(function(acc, next) {
                 return acc.concat(next);
             });
         }
+        formData.append("tags", data.tags);
+        if (data.newImages != null && data.newImages.length > 0) {
+            data.newImages.forEach(function(image) {
+                formData.append("newImage", image);
+            });
+        }
+        if (data.newMesh != null) {
+            formData.append("newMesh", data.newMesh);
+        }
 
         // Envoi des données au serveur
         const self = this;
-        const route = baseApiUrl + "/mesh/new/?token=" + self.props.userToken;
-        axios.post(route, data).then(function(response) {
-            console.log(response);
-            //self.closeModal();
-        }).catch(function(error) {
-            console.log(error);
-            //self.closeModal();
-        });
+        const config = {
+            "headers": {
+                "Content-Type": "multipart/form-data"
+            }
+        };
+        if (this.state.mesh != null) {
+            const route = baseApiUrl + "/mesh/" + this.state.mesh.id + "/edit/?token=" + this.props.userToken;
+            axios.post(route, formData, config).then(function(response) {
+                console.log(response);
+                //self.closeModal();
+            }).catch(function(error) {
+                console.log(error);
+                //self.closeModal();
+            });
+        } else {
+            const route = baseApiUrl + "/mesh/new/?token=" + this.props.userToken;
+            axios.put(route, formData, config).then(function(response) {
+                console.log(response);
+                //self.closeModal();
+            }).catch(function(error) {
+                console.log(error);
+                //self.closeModal();
+            });
+        }
     }
 
     closeModal() {
         this.setState({
             "isOpened": false,
+            "isUploading": false,
+            "step": 1,
             "categories": null,
             "mesh": null,
             "data": {}
@@ -194,60 +274,69 @@ class NouveauMaillage extends Component{
     }
 
     render(){
-        let modalTitle = <span><Icon name="file" /> Partager un nouveau maillage</span>;
-        if (this.state.mesh != null && this.state.mesh.title != null) {
-            modalTitle = <span><Icon name="file" /> Modifier "{this.state.mesh.title}"</span>;
-        }
-        let titleValue = this.state.data.title || "";
-        let cellsValue = this.state.data.cells || "";
-        let verticesValue = this.state.data.vertices || "";
-        let descriptionValue = this.state.data.description || "";
+        if (this.state.isUploading) {
+            // TODO
+        } else {
+            let modalTitle = <span><Icon name="file" /> Partager un nouveau maillage</span>;
+            if (this.state.mesh != null && this.state.mesh.title != null) {
+                modalTitle = <span><Icon name="file" /> Modifier "{this.state.mesh.title}"</span>;
+            }
+            let titleValue = this.state.data.title || "";
+            let cellsValue = this.state.data.cells || "";
+            let verticesValue = this.state.data.vertices || "";
+            let descriptionValue = this.state.data.description || "";
 
-        return (
-            <Modal onOpen={this.openModal} open={this.state.isOpened} trigger={this.props.children} closeIcon onClose={this.closeModal}>
-                <Modal.Header>{modalTitle}</Modal.Header>
-                <Modal.Content>
-                    <Form>
-                        <Container fluid>
-                            <Header dividing size="small">Informations générales</Header>
-                            <Form.Field required>
-                                <label>Titre</label>
-                                <Input type="text" name="title" placeholder='Titre' value={titleValue} onChange={this.handleTextInputChange} />
-                            </Form.Field>
-                            <Form.Group widths="equal">
+            return (
+                <Modal onOpen={this.openModal} open={this.state.isOpened} trigger={this.props.children} closeIcon onClose={this.closeModal}>
+                    <Modal.Header>{modalTitle}</Modal.Header>
+                    <Modal.Content>
+                        <Form>
+                            <Container fluid>
+                                <Header dividing size="small">Informations générales</Header>
                                 <Form.Field required>
-                                    <label>Nombre de cellules</label>
-                                    <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} />
+                                    <label>Titre</label>
+                                    <Input type="text" name="title" placeholder='Titre' value={titleValue} onChange={this.handleTextInputChange} />
                                 </Form.Field>
-                                <Form.Field required>
-                                    <label>Nombre de sommets</label>
-                                    <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} />
+                                <Form.Group widths="equal">
+                                    <Form.Field required>
+                                        <label>Nombre de cellules</label>
+                                        <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} />
+                                    </Form.Field>
+                                    <Form.Field required>
+                                        <label>Nombre de sommets</label>
+                                        <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} />
+                                    </Form.Field>
+                                </Form.Group>
+                                <Form.Field>
+                                    <label>Description</label>
+                                    <TextArea placeholder='Description' name="description" autoHeight value={descriptionValue} onChange={this.handleTextInputChange} />
                                 </Form.Field>
-                            </Form.Group>
-                            <Form.Field>
-                                <label>Description</label>
-                                <TextArea placeholder='Description' name="description" autoHeight value={descriptionValue} onChange={this.handleTextInputChange} />
-                            </Form.Field>
-                        </Container>
-                        <Divider hidden />
-                        { this.renderCategories() }
-                        <Container fluid>
+                            </Container>
                             <Divider hidden />
-                            <Header dividing size="small"><Icon name="image" />Illustrations</Header>
-                            <p>Vous pouvez illustrer votre fichier de maillage par une ou plusieurs images. Types de fichiers autorisés : .jpg, .jpeg, .png, .gif</p>
-                        </Container>
-                        <Divider hidden />
-                        <Container fluid>
-                            <Header dividing size="small"><Icon name="file outline" />Fichier de maillage</Header>
-                            <p>test</p>
-                        </Container>
-                    </Form>
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button primary icon="save" content="Enregistrer" labelPosition="left" onClick={this.handleSave} />
-                </Modal.Actions>
-            </Modal>
-        );
+                            { this.renderCategories() }
+                            <Container fluid>
+                                <Divider hidden />
+                                <Header dividing size="small"><Icon name="image" />Illustrations</Header>
+                                <p>Vous pouvez illustrer votre fichier de maillage par une ou plusieurs images. Types de fichiers autorisés : .jpg, .jpeg, .png, .gif</p>
+                                <Dropzone accept="image/jpeg, image/gif, image/png" maxSize={10485760} onDrop={this.handleImageDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px"}}>
+                                    <p>Faites glisser des fichiers dans cette zone ou cliquez dessus pour ajouter des illustrations.</p>
+                                </Dropzone>
+                            </Container>
+                            <Divider hidden />
+                            <Container fluid>
+                                <Header dividing size="small"><Icon name="file outline" />Fichier de maillage</Header>
+                                <Dropzone maxSize={104857600} onDrop={this.handleMeshDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px"}}>
+                                    <p>Cliquez ou faites glisser un fichier ici pour ajouter un fichier de maillage.</p>
+                                </Dropzone>
+                            </Container>
+                        </Form>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button primary icon="save" content="Enregistrer" labelPosition="left" onClick={this.handleSave} />
+                    </Modal.Actions>
+                </Modal>
+            );
+        }
     }
 }
 
