@@ -8,6 +8,7 @@ import axios from "axios";
 import { baseApiUrl } from "../../conf";
 import { connect } from "react-redux";
 import { setUserToken } from "../../actions.js";
+import { removeUserToken } from "../../actions.js";
 
 class App extends Component {
     static propTypes = {
@@ -16,6 +17,7 @@ class App extends Component {
 
     componentWillMount() {
         const cookieToken = this.props.cookies.get("maillage_userToken");
+        this.props.setUserTokenOnStore(cookieToken);
         if (cookieToken) {
             const self = this;
             const route = baseApiUrl + "/user/revive?token=" + cookieToken;
@@ -28,6 +30,7 @@ class App extends Component {
                 });
                 self.props.setUserTokenOnStore(result.data.data.token);
             }).catch(function(error) {
+                self.props.removeUserTokenOnStore();
                 self.props.cookies.remove("maillage_userToken"); // on supprime le cookie parasite
             });
         }
@@ -51,6 +54,9 @@ const mapStoreToProps = function(store) {
 
 const mapDispatchToProps = function(dispatch) {
     return {
+        "removeUserTokenOnStore": function() {
+            dispatch(removeUserToken());
+        },
         "setUserTokenOnStore": function(token) {
             dispatch(setUserToken(token));
         }
