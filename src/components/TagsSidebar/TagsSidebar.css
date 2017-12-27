@@ -18,6 +18,9 @@
 .TagsSidebar .TagsSidebar-category {
     margin-top: 20px;
 }
+.TagsSidebar .TagsSidebar-category:first-child {
+    margin-top: 5px;
+} 
 .TagsSidebar .TagsSidebar-category h4 {
     margin-bottom: 5px;
     padding-bottom: 5px;

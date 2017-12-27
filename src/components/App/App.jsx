@@ -9,6 +9,8 @@ import { baseApiUrl } from "../../conf";
 import { connect } from "react-redux";
 import { setUserToken } from "../../actions.js";
 import { removeUserToken } from "../../actions.js";
+import { setUserRoles } from "../../actions.js";
+import { removeUserRoles } from "../../actions.js";
 
 class App extends Component {
     static propTypes = {
@@ -20,8 +22,17 @@ class App extends Component {
         this.props.setUserTokenOnStore(cookieToken);
         if (cookieToken) {
             const self = this;
-            const route = baseApiUrl + "/user/revive?token=" + cookieToken;
-            axios.get(route).then(function(result) {
+            const rolesRoutes = baseApiUrl + "/user/roles/?token=" + cookieToken;
+            axios.get(rolesRoutes).then(function(result) {
+                const roles = result.data.map(function(role) {
+                    return role.name;
+                });
+                self.props.setUserRolesOnStore(roles);
+            }).catch(function(error) {
+                self.props.removeUserRolesOnStore();
+            });
+            const reviveRoute = baseApiUrl + "/user/revive?token=" + cookieToken;
+            axios.get(reviveRoute).then(function(result) {
                 let expire = new Date();
                 expire.setTime(result.data.data.expiresAt * 1000); // on prend la date d'expiration du token fournie par l'api
                 self.props.cookies.set("maillage_userToken", result.data.data.token, {
@@ -59,6 +70,12 @@ const mapDispatchToProps = function(dispatch) {
         },
         "setUserTokenOnStore": function(token) {
             dispatch(setUserToken(token));
+        },
+        "setUserRolesOnStore": function(roles) {
+            dispatch(setUserRoles(roles));
+        },
+        "removeUserRolesOnStore": function() {
+            dispatch(removeUserRoles());
         }
     };
 };

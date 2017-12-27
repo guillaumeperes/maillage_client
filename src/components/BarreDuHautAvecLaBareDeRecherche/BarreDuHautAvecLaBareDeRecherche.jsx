@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { removeUserToken } from "../../actions.js";
+import { removeUserRoles } from "../../actions.js";
 import { withCookies } from "react-cookie";
 import "./BarreDuHautAvecLaBareDeRecherche.css";
 
@@ -39,18 +40,24 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
                 </Dropdown>
             );
         }
-
-        return (
-            <Menu fixed="top" size="small" borderless fluid color="grey" inverted className="BarreDuHautAvecLaBareDeRecherche">
-                <Menu.Item header link onClick={this.clicHome}>
-                    <Icon name="fort awesome" size="big" />Le Château Fort
-                </Menu.Item>
-                <Dropdown item icon={<Icon link name="settings" size="large" />}>
+        let adminMenu = null;
+        if (this.props.userRoles.indexOf("administrator") !== -1) {
+            // Menu d'administration
+            adminMenu = (
+                 <Dropdown item icon={<Icon link name="settings" size="large" />}>
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={this.clicGestCategories}><Icon name="tags" /> Gestion des catégories</Dropdown.Item>
                         <Dropdown.Item onClick={this.clicGestUser}><Icon name="users" /> Gestion des utilisateurs</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
+            );
+        }
+        return (
+            <Menu fixed="top" size="small" borderless fluid color="grey" inverted className="BarreDuHautAvecLaBareDeRecherche">
+                <Menu.Item header link onClick={this.clicHome}>
+                    <Icon name="fort awesome" size="big" />Le Château Fort
+                </Menu.Item>
+                { adminMenu }      
                 <Menu.Menu position="right">
                     {rightMenu}
                 </Menu.Menu>
@@ -60,8 +67,11 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
 
     clicLogout(e) {
         e.preventDefault();
-        this.props.cookies.remove("maillage_userToken");
-        this.props.removeUserTokenOnStore();
+        if (this.props.userToken !== null) {
+            this.props.cookies.remove("maillage_userToken");
+            this.props.removeUserTokenOnStore();
+            this.props.removeUserRolesOnStore();
+        }
     }
 
     clicLogin(e) {
@@ -95,7 +105,8 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
 
 const mapStoreToProps = function(store) {
     return {
-        "userToken": store.users.userToken
+        "userToken": store.users.userToken,
+        "userRoles": store.users.userRoles
     };
 };
 
@@ -103,6 +114,9 @@ const mapDispatchToProps = function(dispatch) {
     return {
         "removeUserTokenOnStore": function() {
             dispatch(removeUserToken());
+        },
+        "removeUserRolesOnStore": function() {
+            dispatch(removeUserRoles());
         }
     };
 };

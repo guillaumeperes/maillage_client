@@ -20,6 +20,9 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { setUserToken } from "../../actions.js";
+import { removeUserToken } from "../../actions.js";
+import { setUserRoles } from "../../actions.js";
+import { removeUserRoles } from "../../actions.js";
 import { withCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import "./LoginPage.css";
@@ -89,9 +92,30 @@ class LoginPage extends Component {
                 "path": "/",
                 "expires": expire
             });
-            toast.success(result.data.message);
-            self.props.history.push("/");
+            
+            // User roles
+            const rolesRoutes = baseApiUrl + "/user/roles/?token=" + result.data.data.token;
+            axios.get(rolesRoutes).then(function(result) {
+                const roles = result.data.map(function(role) {
+                    return role.name;
+                });
+                self.props.setUserRolesOnStore(roles);
+                toast.success(result.data.message); 
+                self.props.history.push("/");
+            }).catch(function(error) {
+                self.props.removeUserTokenOnStore();
+                self.props.removeUserRolesOnStore();
+                if (typeof error.response.data.error === "string") {
+                    self.throwSweetError(error.response.data.error);
+                    return;
+                } else {
+                    self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
+                    return;
+                }
+            });
         }).catch(function(error) {
+            self.props.removeUserTokenOnStore();
+            self.props.removeUserRolesOnStore();
             if (typeof error.response.data.error === "string") {
                 self.throwSweetError(error.response.data.error);
                 return;
@@ -203,6 +227,15 @@ const mapDispatchToProps = function(dispatch) {
     return {
         "setUserTokenOnStore": function(token) {
             dispatch(setUserToken(token));
+        },
+        "setUserRolesOnStore": function(roles) {
+            dispatch(setUserRoles(roles));
+        },
+        "removeUserTokenOnStore": function() {
+            dispatch(removeUserToken());
+        },
+        "removeUserRolesOnStore": function() {
+            dispatch(removeUserRoles());
         }
     };
 };

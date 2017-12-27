@@ -9,20 +9,32 @@ import AdminUsersPage from "../AdminUsersPage/AdminUsersPage";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import LoginPage from "../LoginPage/LoginPage";
 import RegisterPage from "../RegisterPage/RegisterPage";
+import { connect } from "react-redux";
 
-export default class Router extends Component {
+class Router extends Component {
     render() {
+        const p = this.props;
         return (
             <BrowserRouter>
                 <Switch>
                     <Route exact path="/" component={HomePage} />
-                    <Route exact path="/login" component={LoginPage} />
-                    <Route exact path="/register" component={RegisterPage} />
-                    <Route exact path="/admin/categories/" component={AdminCategoriesPage} />
-                    <Route exact path="/admin/users/" component={AdminUsersPage} />
+                    {p.userToken == null ? <Route exact path="/login" component={LoginPage} /> : null}
+                    {p.userToken == null ? <Route exact path="/register" component={RegisterPage} /> : null}
+                    {p.userToken !== null && p.userRoles.indexOf("administrator") !== -1 ? <Route exact path="/admin/categories/" component={AdminCategoriesPage} /> : null}
+                    {p.userToken !== null && p.userRoles.indexOf("administrator") !== -1 ? <Route exact path="/admin/users/" component={AdminUsersPage} /> : null}
                     <Route component={PageNotFound} />
                 </Switch>
             </BrowserRouter>
         );
     }
 }
+
+const mapStoreToProps = function(store) {
+    return {
+        "userToken": store.users.userToken,
+        "userRoles": store.users.userRoles
+    };
+};
+
+Router = connect(mapStoreToProps)(Router);
+export default Router;

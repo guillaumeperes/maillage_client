@@ -20,5 +20,17 @@ export default function users(store, action) {
             "userToken": null
         });
     }
+    // Stockage des roles de l'utilisateur
+    if (action.type === "SET_USER_ROLES") {
+        return Object.assign({}, store, {
+            "userRoles": action.payload
+        });
+    }
+    // Efface les rôles de l'utilisateur
+    if (action.type === "REMOVE_USER_ROLES") {
+        return Object.assign({}, store, {
+            "userRoles": []
+        });
+    }
     return store;
 };

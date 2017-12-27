@@ -117,8 +117,7 @@ class TagsSidebar extends Component {
         if (this.state.isLoading) {
             return (
                 <div className="TagsSidebar">
-                    <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
-                    <Divider hidden />
+                    {this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1 ? <span><NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage><Divider hidden /></span> : null }
                     <div className="TagsSidebar-loader">
                         <Dimmer.Dimmable as="div">
                             <Dimmer active inverted>
@@ -129,11 +128,14 @@ class TagsSidebar extends Component {
                 </div>
             );
         } else {
+            let nanoscrollerheight = "calc(100% - 30px)";
+            if (this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1) {
+                nanoscrollerheight = "calc(100% - 95px)";
+            }
             return (
                 <div className="TagsSidebar">
-                    <NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage>
-                    <Divider hidden />
-                    <Scrollbars style={{ width: "100%", height: "calc(100% - 95px)" }}>
+                    {this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1 ? <span><NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage><Divider hidden /></span> : null }
+                    <Scrollbars style={{ width: "100%", height: nanoscrollerheight }}>
                         <div className="TagsSidebar-list">
                             { this.renderCategories(this.state.categories) }
                         </div>
@@ -147,7 +149,9 @@ class TagsSidebar extends Component {
 const mapStoreToProps = function(store) {
     const selectedFilters = store.filters.selectedFilters.slice();
     return {
-        "selectedFilters": selectedFilters
+        "selectedFilters": selectedFilters,
+        "userToken": store.users.userToken,
+        "userRoles": store.users.userRoles
     };
 };
 

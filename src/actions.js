@@ -1,5 +1,8 @@
 // Actions disponibles sur le store
 
+/**
+* Sélectionne un filtre sur le moteur de recherche
+*/
 export function addFilter(filter) {
     return {
         "type": "ADD_FILTER",
@@ -7,6 +10,9 @@ export function addFilter(filter) {
     };
 };
 
+/**
+* Désélectionne un filtre sur le moteur de recherche
+*/
 export function removeFilter(filter) {
     return {
         "type": "REMOVE_FILTER",
@@ -14,6 +20,9 @@ export function removeFilter(filter) {
     };
 };
 
+/**
+* Met à jour le token utilisateur
+*/
 export function setUserToken(token) {
     return {
         "type": "SET_USER_TOKEN",
@@ -21,8 +30,30 @@ export function setUserToken(token) {
     };
 };
 
+/**
+* Efface le token utilisateur
+*/
 export function removeUserToken() {
     return {
         "type": "REMOVE_USER_TOKEN"
+    };
+};
+
+/**
+* Met à jour les rôles de l'utilisateur connecté
+*/
+export function setUserRoles(roles) {
+    return {
+        "type": "SET_USER_ROLES",
+        "payload": roles
+    };
+};
+
+/**
+* Efface les rôles utilisateur
+*/
+export function removeUserRoles() {
+    return {
+        "type": "REMOVE_USER_ROLES"
     };
 };
