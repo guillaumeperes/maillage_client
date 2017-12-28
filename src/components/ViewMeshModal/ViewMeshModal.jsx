@@ -69,7 +69,7 @@ export default class ViewMeshModal extends Component {
 
     downloadMesh() {
         const route = baseApiUrl + "/mesh/" + this.state.mesh.id + "/download/";
-        axios.get(route).then(function(result) {
+        axios.get(route + "?check=1").then(function(result) {
             window.location = route;
         }).catch(function() {
             swal({

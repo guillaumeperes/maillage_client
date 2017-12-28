@@ -96,7 +96,7 @@ class MeshesList extends Component {
 
     downloadMesh(meshId) {
         const route = baseApiUrl + "/mesh/" + meshId + "/download/";
-        axios.get(route).then(function(result) {
+        axios.get(route + "?check=1").then(function(result) {
             window.location = route;
         }).catch(function() {
             swal({
