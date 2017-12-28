@@ -144,11 +144,11 @@ class MeshesList extends Component {
                         <Dropdown icon={<Icon title="Actions" link name="setting" size="large" />}>
                             <Dropdown.Menu className="left">
                                 <ViewMeshModal meshId={mesh.id}><Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item></ViewMeshModal>
-                                <NouveauMaillage meshId={mesh.id}><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></NouveauMaillage>
+                                {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <NouveauMaillage meshId={mesh.id}><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></NouveauMaillage> : null}
                                 <Dropdown.Divider />
                                 <Dropdown.Item><Icon name="download" />Télécharger</Dropdown.Item>
-                                <Dropdown.Divider />
-                                <Dropdown.Item><Icon name="trash" color="red" /><span style={{ color: "rgb(219, 40, 40)" }}>Supprimer</span></Dropdown.Item>
+                                {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Divider /> : null}
+                                {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Item><Icon name="trash" color="red" /><span style={{ color: "rgb(219, 40, 40)" }}>Supprimer</span></Dropdown.Item> : null}
                             </Dropdown.Menu>
                         </Dropdown>
                     </Grid.Column>
@@ -244,7 +244,9 @@ class MeshesList extends Component {
 const mapStoreToProps = function(store) {
     const selectedFilters = store.filters.selectedFilters.slice();
     return {
-        "selectedFilters": selectedFilters
+        "selectedFilters": selectedFilters,
+        "userToken": store.users.userToken,
+        "userRoles": store.users.userRoles
     };
 };
 
