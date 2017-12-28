@@ -19,6 +19,7 @@ import NouveauMaillage from "../NouveauMaillage/NouveauMaillage";
 import ViewMeshModal from "../ViewMeshModal/ViewMeshModal";
 import Recherche from "../Recherche/Recherche";
 import { connect } from "react-redux";
+import swal from "sweetalert";
 import "./MeshesList.css";
 
 class MeshesList extends Component {
@@ -93,6 +94,21 @@ class MeshesList extends Component {
         });
     }
 
+    downloadMesh(meshId) {
+        const route = baseApiUrl + "/mesh/" + meshId + "/download/";
+        axios.get(route).then(function(result) {
+            window.location = route;
+        }).catch(function() {
+            swal({
+                "title": "Erreur",
+                "text": "Une erreur s'est produite.",
+                "dangerMode": true,
+                "icon": "error",
+                "button": "Fermer"
+            }).catch(swal.noop);
+        });
+    }
+
     renderMeshTags(mesh) {
         if (mesh.tags.length > 0) {
             const tags = mesh.tags.map(function(tag, i) {
@@ -146,7 +162,7 @@ class MeshesList extends Component {
                                 <ViewMeshModal meshId={mesh.id}><Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item></ViewMeshModal>
                                 {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <NouveauMaillage meshId={mesh.id}><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></NouveauMaillage> : null}
                                 <Dropdown.Divider />
-                                <Dropdown.Item><Icon name="download" />Télécharger</Dropdown.Item>
+                                <Dropdown.Item onClick={self.downloadMesh.bind(self, mesh.id)}><Icon name="download" />Télécharger</Dropdown.Item>
                                 {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Divider /> : null}
                                 {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Item><Icon name="trash" color="red" /><span style={{ color: "rgb(219, 40, 40)" }}>Supprimer</span></Dropdown.Item> : null}
                             </Dropdown.Menu>

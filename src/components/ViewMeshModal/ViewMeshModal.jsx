@@ -14,6 +14,7 @@ import { Carousel } from "react-responsive-carousel";
 import axios from "axios";
 import filesize from "filesize";
 import { baseApiUrl } from "../../conf";
+import swal from "sweetalert";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "./ViewMeshModal.css";
 
@@ -67,7 +68,18 @@ export default class ViewMeshModal extends Component {
     }
 
     downloadMesh() {
-        console.log("download");
+        const route = baseApiUrl + "/mesh/" + this.state.mesh.id + "/download/";
+        axios.get(route).then(function(result) {
+            window.location = route;
+        }).catch(function() {
+            swal({
+                "title": "Erreur",
+                "text": "Une erreur s'est produite.",
+                "dangerMode": true,
+                "icon": "error",
+                "button": "Fermer"
+            }).catch(swal.noop);
+        });
     }
 
     renderDescription(mesh) {
