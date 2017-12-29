@@ -109,6 +109,45 @@ class MeshesList extends Component {
         });
     }
 
+    deleteMesh(meshId) {
+        const self = this;
+        swal({
+            "title": "Attention",
+            "text": "Souhaitez-vous vraiment supprimer ce fichier de maillage ?",
+            "icon": "warning",
+            "dangerMode": true,
+            "closeOnClickOutside": false,
+            "buttons": {
+                "cancel": "Non",
+                "delete": "Oui"
+            }
+        }).then(function(value) {
+            if (value === "delete") {
+                const route = baseApiUrl + "/mesh/" + meshId + "/delete/?token=" + self.props.userToken;
+                axios.delete(route).then(function(result) {
+                    let meshes = self.state.meshes;
+                    const index = meshes.findIndex(function(mesh) {
+                        return mesh.id === meshId;
+                    });
+                    if (index !== -1) {
+                        meshes.splice(index, 1);
+                        self.setState(Object.assign({}, self.state, {
+                            "meshes": meshes
+                        }));
+                    }
+                }).catch(function() {
+                    swal({
+                        "title": "Erreur",
+                        "text": "Une erreur s'est produite.",
+                        "dangerMode": true,
+                        "icon": "error",
+                        "button": "Fermer"
+                    }).catch(swal.noop);
+                });
+            }
+        });
+    }
+
     renderMeshTags(mesh) {
         if (mesh.tags.length > 0) {
             const tags = mesh.tags.map(function(tag, i) {
@@ -164,7 +203,7 @@ class MeshesList extends Component {
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={self.downloadMesh.bind(self, mesh.id)}><Icon name="download" />Télécharger</Dropdown.Item>
                                 {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Divider /> : null}
-                                {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Item><Icon name="trash" color="red" /><span style={{ color: "rgb(219, 40, 40)" }}>Supprimer</span></Dropdown.Item> : null}
+                                {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Item onClick={self.deleteMesh.bind(self, mesh.id)}><Icon name="trash" color="red" /><span style={{ color: "rgb(219, 40, 40)" }}>Supprimer</span></Dropdown.Item> : null}
                             </Dropdown.Menu>
                         </Dropdown>
                     </Grid.Column>
@@ -190,14 +229,6 @@ class MeshesList extends Component {
         } else {
             return <Dropdown defaultValue={defaultSort.name} options={options} placeholder="Choisir un critère de tri" />;
         }
-    }
-
-    openMesh() {
-        console.log("Open");
-    }
-
-    deleteMesh() {
-        console.log("Delete");
     }
 
     render() {
