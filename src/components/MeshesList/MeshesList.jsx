@@ -20,6 +20,7 @@ import ViewMeshModal from "../ViewMeshModal/ViewMeshModal";
 import Recherche from "../Recherche/Recherche";
 import { connect } from "react-redux";
 import swal from "sweetalert";
+import { toast } from "react-toastify";
 import "./MeshesList.css";
 
 class MeshesList extends Component {
@@ -131,6 +132,7 @@ class MeshesList extends Component {
                     });
                     if (index !== -1) {
                         meshes.splice(index, 1);
+                        toast.success("Le fichier de maillage a été supprimé avec succès.");
                         self.setState(Object.assign({}, self.state, {
                             "meshes": meshes
                         }));
