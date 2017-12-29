@@ -1,0 +1,11 @@
+.NouveauMaillage-file {
+    background-color: #f6f6f7;
+    padding: 6px 4px 6px 5px;
+    margin-top: 5px;
+    border: solid 1px #d4d4d6;
+    border-radius: 2px;
+    overflow: auto;
+}
+.NouveauMaillage-file a {
+    font-size: 12px;
+}

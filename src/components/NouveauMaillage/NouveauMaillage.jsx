@@ -10,11 +10,13 @@ import { TextArea } from "semantic-ui-react";
 import { Dropdown } from "semantic-ui-react";
 import { Header } from "semantic-ui-react";
 import { Divider } from "semantic-ui-react";
+import { Image } from "semantic-ui-react";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import swal from "sweetalert";
 import { connect } from "react-redux";
 import Dropzone from "react-dropzone";
+import "./NouveauMaillage.css";
 
 class NouveauMaillage extends Component{
     constructor(props) {
@@ -36,6 +38,7 @@ class NouveauMaillage extends Component{
         this.handleMeshDrop = this.handleMeshDrop.bind(this);
         this.handleNextStep = this.handleNextStep.bind(this);
         this.handlePreviousStep = this.handlePreviousStep.bind(this);
+        this.handleDeleteNewMesh = this.handleDeleteNewMesh.bind(this);
     }
 
     throwSweetError(message) {
@@ -50,81 +53,71 @@ class NouveauMaillage extends Component{
 
     openModal() {
         const self = this;
+        let promises = [];
 
         // Recherche des catégories disponibles avec leurs tags
         const categoriesRoute = baseApiUrl + "/categories/alltags/";
-        axios.get(categoriesRoute).then(function(response) {
-            const state = Object.assign({}, self.state, {
+        promises[0] = axios.get(categoriesRoute).then(function(response) {
+            self.setState(Object.assign({}, self.state, {
                 "categories": response.data
-            });
-            self.setState(state);
-            if (self.props.meshId == null || (self.props.meshId != null && self.state.mesh != null)) {
-                const state = Object.assign({}, self.state, {
-                    "isOpened": true
-                });
-                self.setState(state);
-            }
-        }).catch(function(error) {
-            self.throwSweetError("Une erreur s'est produite.");
+            }));
         });
         // Si édition : recherche des données du fichier de maillage
-        if (self.props.meshId) {
-            const meshRoute = baseApiUrl + "/mesh/" + self.props.meshId + "/view/";
-            axios.get(meshRoute).then(function(response) {
+        if (this.props.meshId) {
+            const meshRoute = baseApiUrl + "/mesh/" + this.props.meshId + "/view/";
+            promises[1] = axios.get(meshRoute).then(function(response) {
                 let data = {
                     "title": response.data.title,
                     "cells": response.data.cells,
                     "vertices": response.data.vertices,
                     "description": response.data.description,
-                    "tags": {}
+                    "tags": {},
+                    "images": response.data.images
                 };
                 response.data.tagsCategories.forEach(function(tagCategory) {
                     data.tags["category_" + tagCategory.id] = tagCategory.tags.map(function(tag) {
                         return tag.id;
                     });
                 });
-                const state = Object.assign({}, self.state, {
+                self.setState(Object.assign({}, self.state, {
                     "mesh": response.data,
                     "data": Object.assign({}, self.state.data, data)
-                });
-                self.setState(state);
-                if (self.state.categories != null) {
-                    const state = Object.assign({}, self.state, {
-                        "isOpened": true
-                    });
-                    self.setState(state);
-                }
-            }).catch(function(error) {
-                self.throwSweetError("Une erreur s'est produite.");
+                }));
             });
         }
+
+        // Ouverture du modal une fois que les requêtes http sont terminées
+        Promise.all(promises).then(function() {
+            self.setState(Object.assign({}, self.state, {
+                "isOpened": true
+            }));
+        }).catch(function() {
+            self.throwSweetError("Une erreur s'est produite.");
+        });
     }
 
     handleNextStep() {
-        if (this.state.step < 3) {
-            const state = Object.assign({}, this.state, {
+        if (this.state.step < 4) {
+            this.setState(Object.assign({}, this.state, {
                 "step": this.state.step + 1
-            });
-            this.setState(state);
+            }));
         }
     }
 
     handlePreviousStep() {
         if (this.state.step > 1) {
-            const state = Object.assign({}, this.state, {
+            this.setState(Object.assign({}, this.state, {
                 "step": this.state.step - 1
-            });
-            this.setState(state);
+            }));
         }
     }
 
     handleTextInputChange(e, data) {
         let o = {};
         o[data.name] = data.value;
-        const state = Object.assign({}, this.state, {
+        this.setState(Object.assign({}, this.state, {
             "data": Object.assign({}, this.state.data, o)
-        });
-        this.setState(state);
+        }));
     }
 
     handleDropdownChange(e, data) {
@@ -134,12 +127,11 @@ class NouveauMaillage extends Component{
         } else {
             delete tags["category_" + data.category];
         }
-        const state = Object.assign({}, this.state, {
+        this.setState(Object.assign({}, this.state, {
             "data": Object.assign({}, this.state.data, {
                 "tags": tags
             })
-        });
-        this.setState(state);
+        }));
     }
 
     handleImageDrop(files) {
@@ -147,21 +139,65 @@ class NouveauMaillage extends Component{
         files.forEach(function(file) {
             newImages.push(file);
         });
-        const state = Object.assign({}, this.state, {
+        this.setState(Object.assign({}, this.state, {
             "data": Object.assign({}, this.state.data, {
                 "newImages": newImages
             })
+        }));
+    }
+
+    handleDeleteNewImage(index, e) {
+        e.preventDefault();
+        let newImages = this.state.data.newImages;
+        newImages.splice(index, 1);
+        this.setState(Object.assign({}, this.state, {
+            "data": Object.assign({}, this.state.data, {
+                "newImages": newImages
+            })
+        }));
+    }
+
+    handleDeleteExistingImage(index, e) {
+        e.preventDefault();
+        const self = this;
+        swal({
+            "title": "Attention",
+            "text": "Souhaitez-vous vraiment supprimer cette image ?",
+            "icon": "warning",
+            "dangerMode": true,
+            "closeOnClickOutside": false,
+            "buttons": {
+                "cancel": "Non",
+                "delete": "Oui"
+            }
+        }).then(function(value) {
+            if (value === "delete") {
+                let images = self.state.data.images;
+                images.splice(index, 1);
+                self.setState(Object.assign({}, self.state, {
+                    "data": Object.assign({}, self.state.data, {
+                        "images": images
+                    })
+                }));
+            }
         });
-        this.setState(state);
     }
 
     handleMeshDrop(files) {
-        const state = Object.assign({}, this.state, {
+        this.setState(Object.assign({}, this.state, {
             "data": Object.assign({}, this.state.data, {
                 "newMesh": files[0]
             })
-        });
-        this.setState(state);
+        }));
+    }
+
+    handleDeleteNewMesh(e) {
+        e.preventDefault();
+        this.setState(Object.assign({}, this.state, {
+            "data": Object.assign({}, this.state.data, {
+                "newMesh": null
+            })
+        }));
     }
 
     handleSave() {
@@ -231,13 +267,28 @@ class NouveauMaillage extends Component{
     }
 
     closeModal() {
-        this.setState({
-            "isOpened": false,
-            "isUploading": false,
-            "step": 1,
-            "categories": null,
-            "mesh": null,
-            "data": {}
+        const self = this;
+        swal({
+            "title": "Attention",
+            "text": "Si vous quittez dans sauvegarder, vos modifications seront perdues. Êtes-vous certain de vouloir quitter ?",
+            "icon": "warning",
+            "dangerMode": true,
+            "closeOnClickOutside": false,
+            "buttons": {
+                "cancel": "Rester sur cette page",
+                "exit": "Quitter"
+            }
+        }).then(function(value) {
+            if (value === "exit") {
+                self.setState({
+                    "isOpened": false,
+                    "isUploading": false,
+                    "step": 1,
+                    "categories": null,
+                    "mesh": null,
+                    "data": {}
+                });
+            }
         });
     }
     
@@ -265,18 +316,14 @@ class NouveauMaillage extends Component{
                 </Form.Field>  
             );
         });
-        return (
-            <Container fluid>
-                <Header dividing size="small"><Icon name="tags" />Tags</Header>
-                {out}
-            </Container>
-        );
+        return out;
     }
 
     render(){
         if (this.state.isUploading) {
             // TODO
         } else {
+            // Données du formulaire
             let modalTitle = <span><Icon name="file" /> Partager un nouveau maillage</span>;
             if (this.state.mesh != null && this.state.mesh.title != null) {
                 modalTitle = <span><Icon name="file" /> Modifier "{this.state.mesh.title}"</span>;
@@ -286,54 +333,154 @@ class NouveauMaillage extends Component{
             let verticesValue = this.state.data.vertices || "";
             let descriptionValue = this.state.data.description || "";
 
+            let modalContent = null;
+            let modalActions = null;
+
+            if (this.state.step === 1) {
+                // Saisie des informations générales
+                modalContent = (
+                    <Form>
+                        <Container fluid>
+                            <Header dividing size="small"><Icon name="file text outline" />Informations générales</Header>
+                            <Form.Field required>
+                                <label>Titre</label>
+                                <Input type="text" name="title" placeholder='Titre' value={titleValue} onChange={this.handleTextInputChange} />
+                            </Form.Field>
+                            <Form.Group widths="equal">
+                                <Form.Field required>
+                                    <label>Nombre de cellules</label>
+                                    <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} />
+                                </Form.Field>
+                                <Form.Field required>
+                                    <label>Nombre de sommets</label>
+                                    <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} />
+                                </Form.Field>
+                            </Form.Group>
+                            <Form.Field>
+                                <label>Description</label>
+                                <TextArea placeholder='Description' name="description" autoHeight value={descriptionValue} onChange={this.handleTextInputChange} />
+                            </Form.Field>
+                        </Container>
+                    </Form>
+                );
+                modalActions = (
+                    <span>
+                        <Button content="Annuler" onClick={this.closeModal} />
+                        <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleNextStep} />
+                    </span>
+                );
+            } else if (this.state.step === 2) {
+                // Saisie des tags
+                modalContent = (
+                    <Form>
+                        <Container fluid>
+                            <Header dividing size="small"><Icon name="tags" />Tags</Header>
+                            {this.renderCategories()}
+                        </Container>
+                    </Form>
+                );
+                modalActions = (
+                    <span>
+                        <Button content="Annuler" onClick={this.closeModal} />
+                        <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
+                        <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleNextStep} />
+                    </span>
+                );
+            } else if (this.state.step === 3) {
+                // Saisie des illustrations
+                let existingImages = [];
+                if (this.state.data.images != null && this.state.data.images.length > 0) {
+                    const self = this;
+                    existingImages = this.state.data.images.map(function(image, i) {
+                        return (
+                            <div className="NouveauMaillage-file" key={i}>
+                                <Image src={baseApiUrl + image.thumbUri} spaced rounded size="mini" floated="left" />
+                                <div><strong>Image {i + 1}</strong></div>
+                                <div><a href="" title="Supprimer" onClick={self.handleDeleteExistingImage.bind(self, i)}><Icon name="trash outline" />Supprimer</a></div>
+                            </div>
+                        );
+                    });
+                }
+                let imagesList = [];
+                if (this.state.data.newImages != null) {
+                    const self = this;
+                    imagesList = this.state.data.newImages.map(function(newImage, i) {
+                        return (
+                            <div className="NouveauMaillage-file" key={i}>
+                                <Image src={newImage.preview} spaced rounded size="mini" floated="left" />
+                                <div><strong>{newImage.name}</strong></div>
+                                <div><a href="" title="Supprimer" onClick={self.handleDeleteNewImage.bind(self, i)}><Icon name="trash outline" />Supprimer</a></div>
+                            </div>
+                        );
+                    });
+                }
+                modalContent = (
+                    <Container fluid>
+                        <Header dividing size="small"><Icon name="image" />Images</Header>
+                        <p>Vous pouvez illustrer votre fichier de maillage par une ou plusieurs images.</p>
+                        <Dropzone accept="image/jpeg, image/gif, image/png" maxSize={10485760} onDrop={this.handleImageDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px", "textAlign": "center", "padding": "20px 0 15px 0", "fontSize": "13px", "cursor": "pointer"}}>
+                            <div><Icon name="file image outline" size="large" /></div>
+                            <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> des images.</p>
+                        </Dropzone>
+                        {existingImages.length > 0 ? (
+                            <span>
+                                <Divider hidden />
+                                <Header size="tiny">Images existantes</Header>
+                                {existingImages}
+                            </span>
+                        ) : null}
+                        {imagesList.length > 0 ? (
+                            <span>
+                                <Divider hidden />
+                                <Header size="tiny">Nouvelles images</Header>
+                                {imagesList}
+                            </span>
+                        ) : null}
+                    </Container>
+                );
+                modalActions = (
+                    <span>
+                        <Button content="Annuler" onClick={this.closeModal} />
+                        <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
+                        <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleNextStep} />
+                    </span>
+                );
+            } else if (this.state.step === 4) {
+                // Saisie du fichier de maillage
+                modalContent = (
+                    <Container fluid>
+                        <Header dividing size="small"><Icon name="file outline" />Fichier de maillage</Header>
+                        <Dropzone maxSize={104857600} onDrop={this.handleMeshDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px", "textAlign": "center", "padding": "20px 0 15px 0", "fontSize": "13px", "cursor": "pointer"}}>
+                            <div><Icon name="file image outline" size="large" /></div>
+                            <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> un fichier.</p>
+                        </Dropzone>
+                        {this.state.data.newMesh != null ? (
+                            <span>
+                                <Divider hidden />
+                                <Header size="tiny">Nouveau fichier de maillage</Header>
+                                <div className="NouveauMaillage-file">
+                                    <div style={{float: "left"}}><Icon name="file outline" /></div>
+                                    <div><strong>{this.state.data.newMesh.name}</strong></div>
+                                    <div><a href="" title="Supprimer" onClick={this.handleDeleteNewMesh}><Icon name="trash outline" />Supprimer</a></div>
+                                </div>
+                            </span>
+                        ) : null}
+                    </Container>
+                );
+                modalActions = (
+                    <span>
+                        <Button content="Annuler" onClick={this.closeModal} />
+                        <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
+                        <Button primary icon="save" content="Enregistrer" labelPosition="left" onClick={this.handleSave} />
+                    </span>
+                );
+            }
+
             return (
                 <Modal onOpen={this.openModal} open={this.state.isOpened} trigger={this.props.children} closeIcon onClose={this.closeModal}>
                     <Modal.Header>{modalTitle}</Modal.Header>
-                    <Modal.Content>
-                        <Form>
-                            <Container fluid>
-                                <Header dividing size="small">Informations générales</Header>
-                                <Form.Field required>
-                                    <label>Titre</label>
-                                    <Input type="text" name="title" placeholder='Titre' value={titleValue} onChange={this.handleTextInputChange} />
-                                </Form.Field>
-                                <Form.Group widths="equal">
-                                    <Form.Field required>
-                                        <label>Nombre de cellules</label>
-                                        <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} />
-                                    </Form.Field>
-                                    <Form.Field required>
-                                        <label>Nombre de sommets</label>
-                                        <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} />
-                                    </Form.Field>
-                                </Form.Group>
-                                <Form.Field>
-                                    <label>Description</label>
-                                    <TextArea placeholder='Description' name="description" autoHeight value={descriptionValue} onChange={this.handleTextInputChange} />
-                                </Form.Field>
-                            </Container>
-                            <Divider hidden />
-                            { this.renderCategories() }
-                            <Container fluid>
-                                <Divider hidden />
-                                <Header dividing size="small"><Icon name="image" />Illustrations</Header>
-                                <p>Vous pouvez illustrer votre fichier de maillage par une ou plusieurs images. Types de fichiers autorisés : .jpg, .jpeg, .png, .gif</p>
-                                <Dropzone accept="image/jpeg, image/gif, image/png" maxSize={10485760} onDrop={this.handleImageDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px"}}>
-                                    <p>Faites glisser des fichiers dans cette zone ou cliquez dessus pour ajouter des illustrations.</p>
-                                </Dropzone>
-                            </Container>
-                            <Divider hidden />
-                            <Container fluid>
-                                <Header dividing size="small"><Icon name="file outline" />Fichier de maillage</Header>
-                                <Dropzone maxSize={104857600} onDrop={this.handleMeshDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px"}}>
-                                    <p>Cliquez ou faites glisser un fichier ici pour ajouter un fichier de maillage.</p>
-                                </Dropzone>
-                            </Container>
-                        </Form>
-                    </Modal.Content>
-                    <Modal.Actions>
-                        <Button primary icon="save" content="Enregistrer" labelPosition="left" onClick={this.handleSave} />
-                    </Modal.Actions>
+                    <Modal.Content>{modalContent}</Modal.Content>
+                    <Modal.Actions>{modalActions}</Modal.Actions>
                 </Modal>
             );
         }
