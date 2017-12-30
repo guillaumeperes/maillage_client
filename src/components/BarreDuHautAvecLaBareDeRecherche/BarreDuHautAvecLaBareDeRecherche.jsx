@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import { removeUserToken } from "../../actions.js";
 import { removeUserRoles } from "../../actions.js";
 import { withCookies } from "react-cookie";
+import { toast } from "react-toastify";
 import "./BarreDuHautAvecLaBareDeRecherche.css";
 
 class BarreDuHautAvecLaBareDeRecherche extends Component {
@@ -71,6 +72,10 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
             this.props.cookies.remove("maillage_userToken");
             this.props.removeUserTokenOnStore();
             this.props.removeUserRolesOnStore();
+            toast.success("Vous avez été déconnecté.");
+            if (this.props.location.pathname !== "/") {
+                this.props.history.push("/");
+            }
         }
     }
 
