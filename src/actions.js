@@ -21,6 +21,16 @@ export function removeFilter(filter) {
 };
 
 /**
+* Sélection d'un critère de tri
+*/
+export function setSelectedSort(sort) {
+    return {
+        "type": "SET_SELECTED_SORT",
+        "payload": sort
+    };
+};
+
+/**
 * Met à jour le token utilisateur
 */
 export function setUserToken(token) {

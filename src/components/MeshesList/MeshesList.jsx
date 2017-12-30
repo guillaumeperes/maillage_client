@@ -23,6 +23,7 @@ import { connect } from "react-redux";
 import swal from "sweetalert";
 import { toast } from "react-toastify";
 import tinycolor from "tinycolor2";
+import { setSelectedSort } from "../../actions.js";
 import "./MeshesList.css";
 
 class MeshesList extends Component {
@@ -33,12 +34,12 @@ class MeshesList extends Component {
             "meshes": [],
             "count": 0,
             "sorts": [],
-            "currentSort": null,
             "page": 1,
             "pageSize": 20,
             "loadMore": true
         };
         this.handleScroll = this.handleScroll.bind(this);
+        this.handleSortChange = this.handleSortChange.bind(this);
     }
 
     componentWillMount() {
@@ -64,9 +65,9 @@ class MeshesList extends Component {
             const defaultSort = response.data.find(function(sort) {
                 return sort.default;
             });
+            self.props.setSelectedSortOnStore(defaultSort.name);
             self.setState(Object.assign({}, self.state, {
-                "sorts": response.data,
-                "currentSort": defaultSort != null ? defaultSort.name : "title"
+                "sorts": response.data
             }));
         });
         Promise.all(promises).then(function() {
@@ -86,7 +87,6 @@ class MeshesList extends Component {
                 "meshes": [],
                 "count": 0,
                 "sorts": [],
-                "currentSort": null,
                 "page": 1,
                 "loadMore": false
             }));
@@ -104,7 +104,8 @@ class MeshesList extends Component {
         }));
         let params = {
             "page": 1,
-            "pageSize": this.state.pageSize
+            "pageSize": this.state.pageSize,
+            "sort": nextProps.selectedSort
         };
         if (nextProps.selectedFilters.length > 0) {
             params.filters = nextProps.selectedFilters;
@@ -130,7 +131,6 @@ class MeshesList extends Component {
                 "meshes": [],
                 "count": 0,
                 "sorts": [],
-                "currentSort": null,
                 "page": 1,
                 "loadMore": false
             }));
@@ -198,7 +198,8 @@ class MeshesList extends Component {
             const self = this;
             const params = {
                 "page": this.state.page + 1,
-                "pageSize": this.state.pageSize
+                "pageSize": this.state.pageSize,
+                "sort": this.props.selectedSort
             };
             if (this.props.selectedFilters.length > 0) {
                 params.filters = this.props.selectedFilters;
@@ -233,6 +234,10 @@ class MeshesList extends Component {
                 }));
             });
         }
+    }
+
+    handleSortChange(e, data) {
+        this.props.setSelectedSortOnStore(data.value);
     }
 
     renderMeshes() {
@@ -305,7 +310,7 @@ class MeshesList extends Component {
         if (this.state.isLoading) {
             return <Dropdown loading disabled text="En cours de chargement" />;
         } else {
-            return <Dropdown value={this.state.currentSort} options={options} placeholder="Choisir un critère de tri" />;
+            return <Dropdown value={this.props.selectedSort} options={options} onChange={this.handleSortChange} placeholder="Choisir un critère de tri" />;
         }
     }
 
@@ -371,9 +376,18 @@ const mapStoreToProps = function(store) {
     return {
         "selectedFilters": selectedFilters,
         "userToken": store.users.userToken,
-        "userRoles": store.users.userRoles
+        "userRoles": store.users.userRoles,
+        "selectedSort": store.sorts.selectedSort
     };
 };
 
-MeshesList = connect(mapStoreToProps)(MeshesList);
+const mapDispatchToProps = function(dispatch) {
+    return {
+        "setSelectedSortOnStore": function(sort) {
+            dispatch(setSelectedSort(sort));
+        }
+    };
+};
+
+MeshesList = connect(mapStoreToProps, mapDispatchToProps)(MeshesList);
 export default MeshesList;
