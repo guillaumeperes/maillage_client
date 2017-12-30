@@ -15,6 +15,7 @@ import axios from "axios";
 import filesize from "filesize";
 import { baseApiUrl } from "../../conf";
 import swal from "sweetalert";
+import moment from "moment";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "./ViewMeshModal.css";
 
@@ -169,9 +170,6 @@ export default class ViewMeshModal extends Component {
             );
         } else if (this.state.mesh != null) {
             const mesh = this.state.mesh;
-
-            const d = new Date(mesh.created);
-            const created = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear() + " à " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
             let user = mesh.user.email;
             if (mesh.user.firstname != null && mesh.user.lastname != null) {
                 user = mesh.user.firstname + " " + mesh.user.lastname;
@@ -189,7 +187,7 @@ export default class ViewMeshModal extends Component {
                                 <Grid.Column width={16}>
                                     <Header as="h1" size="small">
                                         {mesh.title}
-                                        <Header.Subheader>ajouté par <strong>{user}</strong> le <strong>{created}</strong></Header.Subheader>
+                                        <Header.Subheader>ajouté par <strong>{user}</strong> le <strong>{moment(mesh.created).format("DD/MM/YYYY à HH:mm:ss")}</strong></Header.Subheader>
                                     </Header>
                                 </Grid.Column>
                                 <Grid.Column width={16} textAlign="center">
@@ -200,7 +198,7 @@ export default class ViewMeshModal extends Component {
                                 <Grid.Column width={12}>
                                     <Header as="h1" size="small">
                                         {mesh.title}
-                                        <Header.Subheader>ajouté par <strong>{user}</strong> le <strong>{created}</strong></Header.Subheader>
+                                        <Header.Subheader>ajouté par <strong>{user}</strong> le <strong>{moment(mesh.created).format("DD/MM/YYYY à HH:mm:ss")}</strong></Header.Subheader>
                                     </Header>
                                 </Grid.Column>
                                 <Grid.Column width={4} textAlign="right">

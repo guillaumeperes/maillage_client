@@ -24,6 +24,7 @@ import swal from "sweetalert";
 import { toast } from "react-toastify";
 import tinycolor from "tinycolor2";
 import { setSelectedSort } from "../../actions.js";
+import moment from "moment";
 import "./MeshesList.css";
 
 class MeshesList extends Component {
@@ -248,9 +249,6 @@ class MeshesList extends Component {
             if (typeof mesh.images[0].thumbUri === "string") {
                 thumb = <Image width="70px" height="70px" verticalAlign="middle" alt={mesh.title} shape="rounded" floated="left" src={baseApiUrl + mesh.images[0].thumbUri} />;
             }
-            // Date de création
-            const d = new Date(mesh.created);
-            const created = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear() + " - " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
             // Tags
             let meshTags = [];
             if (mesh.tags.length > 0) {
@@ -271,7 +269,7 @@ class MeshesList extends Component {
                                 <div>
                                     <Header as="h2" size="small">{mesh.title}</Header>
                                     <div className="MeshesList-small">#{mesh.id}</div>
-                                    <div className="MeshesList-small">{created}</div>
+                                    <div className="MeshesList-small">{moment(mesh.created).format("DD/MM/YYYY - HH:mm:ss")}</div>
                                     { meshTags.length > 0 ? <div className="MeshesList-tags">{meshTags}</div> : null }
                                 </div>
                             </Grid.Column>
