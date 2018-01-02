@@ -196,6 +196,9 @@ class MeshesList extends Component {
 
     handleScroll(values) {
         if (values.top * 100 > 80 && this.state.loadMore) {
+            this.setState(Object.assign({}, this.state, {
+                "loadMore": false
+            }));
             const self = this;
             const params = {
                 "page": this.state.page + 1,
