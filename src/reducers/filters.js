@@ -30,5 +30,11 @@ export default function filters(store, action) {
             "selectedFilters": filters
         });
     }
+    // Désélectionne toutes les facettes
+    if (action.type === "REMOVE_FILTERS") {
+        return Object.assign({}, store, {
+            "selectedFilters": []
+        });
+    }
     return store;
 };

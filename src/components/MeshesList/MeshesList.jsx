@@ -24,12 +24,17 @@ import swal from "sweetalert";
 import { toast } from "react-toastify";
 import tinycolor from "tinycolor2";
 import { setSelectedSort } from "../../actions.js";
+import { setKeyword } from "../../actions.js";
+import { removeKeyword } from "../../actions.js";
+import { removeFilters } from "../../actions.js";
+import { Popup } from "semantic-ui-react";
 import moment from "moment";
 import "./MeshesList.css";
 
 class MeshesList extends Component {
     constructor(props) {
         super(props);
+        this.keywordBuffer = "";
         this.state = {
             "isLoading": true,
             "meshes": [],
@@ -41,6 +46,10 @@ class MeshesList extends Component {
         };
         this.handleScroll = this.handleScroll.bind(this);
         this.handleSortChange = this.handleSortChange.bind(this);
+        this.handleResetSearch = this.handleResetSearch.bind(this);
+        this.handleSearch = this.handleSearch.bind(this);
+        this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
+        this.handleSaveSearchBarRef = this.handleSaveSearchBarRef.bind(this);
     }
 
     componentWillMount() {
@@ -101,13 +110,16 @@ class MeshesList extends Component {
             "meshes": [],
             "count": 0,
             "page": 1,
-            "loadMore": true
+            "loadMore": false
         }));
         let params = {
             "page": 1,
             "pageSize": this.state.pageSize,
             "sort": nextProps.selectedSort
         };
+        if (nextProps.keyword !== null && nextProps.keyword.length > 0) {
+            params.keyword = nextProps.keyword;
+        }
         if (nextProps.selectedFilters.length > 0) {
             params.filters = nextProps.selectedFilters;
         }
@@ -208,6 +220,9 @@ class MeshesList extends Component {
             if (this.props.selectedFilters.length > 0) {
                 params.filters = this.props.selectedFilters;
             }
+            if (this.props.keyword != null && this.props.keyword.length > 0) {
+                params.keyword = this.props.keyword;
+            }
             const searchRoute = baseApiUrl + "/meshes/search/";
             axios.get(searchRoute, {"params": params}).then(function(response) {
                 let meshes = self.state.meshes;
@@ -242,6 +257,31 @@ class MeshesList extends Component {
 
     handleSortChange(e, data) {
         this.props.setSelectedSortOnStore(data.value);
+    }
+
+    handleSaveSearchBarRef(input) {
+        this.searchBar = input;
+    }
+
+    handleSearchInputChange(e, data) {
+        this.keywordBuffer = data.value.trim();
+    }
+
+    handleSearch(e) {
+        if (e.type === "click") {
+            this.props.setKeywordOnStore(this.keywordBuffer);
+        } else if (e.type === "keypress") {
+            if (e.key === "Enter") {
+                this.props.setKeywordOnStore(this.keywordBuffer);
+            }
+        }
+    }
+
+    handleResetSearch() {
+        this.keywordBuffer = "";
+        this.searchBar.inputRef.value = "";
+        this.props.removeFiltersOnStore();
+        this.props.removeKeywordOnStore();
     }
 
     renderMeshes() {
@@ -346,7 +386,7 @@ class MeshesList extends Component {
             <div className="MeshesList">
                 <Scrollbars style={{ width: "100%", height: "calc(100% - 50px)" }} onScrollFrame={this.handleScroll}>
                     <div className="MeshesList-scroller">
-                        <Input fluid action={<Button primary icon="search" title="Rechercher" />} />
+                        <Input fluid ref={this.handleSaveSearchBarRef} placeholder="Rechercher par titre ou description..." onChange={this.handleSearchInputChange} onKeyPress={this.handleSearch} action={<Button.Group><Button primary icon="search" title="Rechercher" onClick={this.handleSearch} /><Popup content="Réinitialiser la recherche" position="bottom right" size="small" hideOnScroll inverted trigger={<Button basic icon="close" onClick={this.handleResetSearch} />} /></Button.Group>} />
                         <Divider hidden />
                         <Responsive maxWidth={992}>
                             <Container fluid textAlign="center">
@@ -378,12 +418,22 @@ const mapStoreToProps = function(store) {
         "selectedFilters": selectedFilters,
         "userToken": store.users.userToken,
         "userRoles": store.users.userRoles,
-        "selectedSort": store.sorts.selectedSort
+        "selectedSort": store.sorts.selectedSort,
+        "keyword": store.keyword.keyword
     };
 };
 
 const mapDispatchToProps = function(dispatch) {
     return {
+        "setKeywordOnStore": function(keyword) {
+            dispatch(setKeyword(keyword));
+        },
+        "removeKeywordOnStore": function() {
+            dispatch(removeKeyword());
+        },
+        "removeFiltersOnStore": function() {
+            dispatch(removeFilters());
+        },
         "setSelectedSortOnStore": function(sort) {
             dispatch(setSelectedSort(sort));
         }

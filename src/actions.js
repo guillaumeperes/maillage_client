@@ -21,12 +21,37 @@ export function removeFilter(filter) {
 };
 
 /**
+* Désélectionne toutes les facettes
+*/
+export function removeFilters() {
+    return {
+        "type": "REMOVE_FILTERS"
+    };
+};
+
+/**
 * Sélection d'un critère de tri
 */
 export function setSelectedSort(sort) {
     return {
         "type": "SET_SELECTED_SORT",
         "payload": sort
+    };
+};
+
+/**
+* Recherche fulltext
+*/
+export function setKeyword(keyword) {
+    return {
+        "type": "SET_KEYWORD",
+        "payload": keyword
+    };
+};
+
+export function removeKeyword() {
+    return {
+        "type": "REMOVE_KEYWORD"
     };
 };
 
