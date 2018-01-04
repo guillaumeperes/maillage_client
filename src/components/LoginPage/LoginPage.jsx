@@ -86,25 +86,27 @@ class LoginPage extends Component {
 
         // Envoi des données à l'API pour authentification
         const route = baseApiUrl + "/login";
-        axios.post(route, data).then(function(result) {
-            // User token va dans le store
-            self.props.setUserTokenOnStore(result.data.data.token); 
-            // User token va aussi dans un cookie
-            let expire = new Date();
-            expire.setTime(result.data.data.expiresAt * 1000); // on prend la date d'expiration du token fournie par l'api
-            self.props.cookies.set("maillage_userToken", result.data.data.token, {
-                "path": "/",
-                "expires": expire
-            });
-            
+        axios.post(route, data).then(function(tokenResult) {
             // User roles
-            const rolesRoutes = baseApiUrl + "/user/roles/?token=" + result.data.data.token;
-            axios.get(rolesRoutes).then(function(result) {
-                const roles = result.data.map(function(role) {
+            const rolesRoutes = baseApiUrl + "/user/roles/?token=" + tokenResult.data.data.token;
+            axios.get(rolesRoutes).then(function(rolesResult) {
+                // User token va dans le store
+                self.props.setUserTokenOnStore(tokenResult.data.data.token);
+
+                // User token va aussi dans un cookie
+                let expire = new Date();
+                expire.setTime(tokenResult.data.data.expiresAt * 1000); // on prend la date d'expiration du token fournie par l'api
+                self.props.cookies.set("maillage_userToken", tokenResult.data.data.token, {
+                    "path": "/",
+                    "expires": expire
+                });
+
+                // Format des rôles
+                const roles = rolesResult.data.map(function(role) {
                     return role.name;
                 });
                 self.props.setUserRolesOnStore(roles);
-                toast.success(result.data.message); 
+                toast.success(rolesResult.data.message); 
                 self.props.history.push("/");
             }).catch(function(error) {
                 self.props.removeUserTokenOnStore();
