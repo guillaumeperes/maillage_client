@@ -48,6 +48,10 @@ class RegisterPage extends Component {
     }
 
     handleSubmit(e) {
+        if (e.type === "keypress" && e.key !== "Enter") {
+            return;
+        }
+        
         const self = this;
         const data = self.state.data;
 
@@ -124,23 +128,23 @@ class RegisterPage extends Component {
                             <Form>
                                 <Form.Field>
                                     <label>Nom</label>
-                                    <Input name="lastname" type="text" onChange={this.handleFormData} />
+                                    <Input name="lastname" type="text" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Form.Field>
                                     <label>Prénom</label>
-                                    <Input name="firstname" type="text" onChange={this.handleFormData} />
+                                    <Input name="firstname" type="text" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Form.Field required>
                                     <label>Adresse e-mail</label>
-                                    <Input name="email" type="email" onChange={this.handleFormData} />
+                                    <Input name="email" type="email" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Form.Field required>
                                     <label>Mot de passe</label>
-                                    <Input name="password" type="password" onChange={this.handleFormData} />
+                                    <Input name="password" type="password" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Form.Field required>
                                     <label>Confirmez votre mot de passe</label>
-                                    <Input name="password2" type="password" onChange={this.handleFormData} />
+                                    <Input name="password2" type="password" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Divider hidden />
                                 <Responsive maxWidth={768}>

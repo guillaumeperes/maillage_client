@@ -77,7 +77,11 @@ class CategoryModal extends Component {
         });
     }
 
-    handleSave() {
+    handleSave(e) {
+        if (e.type === "keypress" && e.key !== "Enter") {
+            return;
+        }
+
         let data = this.state.data;
 
         // Vérification des données
@@ -164,7 +168,7 @@ class CategoryModal extends Component {
                         <Container fluid>
                             <Form.Field required>
                                 <label>Titre</label>
-                                <Input type="text" name="title" placeholder="Titre" value={titleValue} onChange={this.handleTextInputChange} />
+                                <Input type="text" name="title" placeholder="Titre" value={titleValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSave} />
                             </Form.Field>
                             <Form.Field>
                                 <label>Couleur de la catégorie</label>

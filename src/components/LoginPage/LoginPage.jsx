@@ -67,6 +67,10 @@ class LoginPage extends Component {
     }
 
     handleSubmit(e) {
+        if (e.type === "keypress" && e.key !== "Enter") {
+            return;
+        }
+
         const self = this;
         const data = self.state.data;
 
@@ -158,11 +162,11 @@ class LoginPage extends Component {
                             <Form>
                                 <Form.Field required>
                                     <label>Adresse e-mail</label>
-                                    <Input name="email" type="email" onChange={this.handleFormData} />
+                                    <Input name="email" type="email" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Form.Field required>
                                     <label>Mot de passe</label>
-                                    <Input name="password" type="password" onChange={this.handleFormData} />
+                                    <Input name="password" type="password" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Divider hidden />
                                 <Responsive maxWidth={768}>
