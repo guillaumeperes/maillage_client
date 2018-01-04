@@ -50,6 +50,9 @@ class TagsSidebar extends Component {
         if (nextProps.selectedFilters.length > 0) {
             params.filters = nextProps.selectedFilters;
         }
+        if (nextProps.keyword !== null && nextProps.keyword.length > 0) {
+            params.keyword = nextProps.keyword;
+        }
         const route = baseApiUrl + "/categories/list/";
         axios.get(route, {"params": params}).then(function(response) {
             self.setState({
@@ -151,7 +154,8 @@ const mapStoreToProps = function(store) {
     return {
         "selectedFilters": selectedFilters,
         "userToken": store.users.userToken,
-        "userRoles": store.users.userRoles
+        "userRoles": store.users.userRoles,
+        "keyword": store.keyword.keyword
     };
 };
 
