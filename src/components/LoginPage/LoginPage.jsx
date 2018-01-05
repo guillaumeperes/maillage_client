@@ -11,6 +11,7 @@ import { List } from "semantic-ui-react";
 import { Button } from "semantic-ui-react";
 import { Divider } from "semantic-ui-react";
 import { Responsive } from "semantic-ui-react";
+import { Message } from "semantic-ui-react";
 import { baseApiUrl } from "../../conf";
 import swal from "sweetalert";
 import validator from "email-validator";
@@ -39,7 +40,8 @@ class LoginPage extends Component {
         super(props);
         document.title = "Connexion | Le château fort";
         this.state = {
-            "data": {}
+            "data": {},
+            "errors": {}
         };
         this.handleFormData = this.handleFormData.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -70,21 +72,27 @@ class LoginPage extends Component {
         if (e.type === "keypress" && e.key !== "Enter") {
             return;
         }
+        const data = this.state.data;
 
-        const self = this;
-        const data = self.state.data;
+        // Validation des données
 
-        // Vérification des champs
+        let errors = {};
         if (data.email == null || !data.email.length || !validator.validate(data.email)) {
-            self.throwSweetError("Merci de renseigner une adresse e-mail valide.");
-            return;
+            errors.email = "Merci de renseigner votre adresse e-mail.";
         }
         if (data.password == null || !data.password.length) {
-            self.throwSweetError("Merci de renseigner votre mot de passe.");
+            errors.password = "Merci de renseigner votre mot de passe.";
+        }
+        this.setState(Object.assign({}, this.state, {
+            "errors": errors
+        }));
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
         // Envoi des données à l'API pour authentification
+
+        const self = this;
         const route = baseApiUrl + "/login";
         axios.post(route, data).then(function(tokenResult) {
             // User roles
@@ -92,7 +100,6 @@ class LoginPage extends Component {
             axios.get(rolesRoutes).then(function(rolesResult) {
                 // User token va dans le store
                 self.props.setUserTokenOnStore(tokenResult.data.data.token);
-
                 // User token va aussi dans un cookie
                 let expire = new Date();
                 expire.setTime(tokenResult.data.data.expiresAt * 1000); // on prend la date d'expiration du token fournie par l'api
@@ -100,7 +107,6 @@ class LoginPage extends Component {
                     "path": "/",
                     "expires": expire
                 });
-
                 // Format des rôles
                 const roles = rolesResult.data.map(function(role) {
                     return role.name;
@@ -111,22 +117,28 @@ class LoginPage extends Component {
             }).catch(function(error) {
                 self.props.removeUserTokenOnStore();
                 self.props.removeUserRolesOnStore();
-                if (typeof error.response.data.error === "string") {
-                    self.throwSweetError(error.response.data.error);
+                if (error.response !== null) {
+                    errors.general = error.response.data.error;
+                    self.setState(Object.assign({}, self.state, {
+                        "errors": errors
+                    }));
                     return;
                 } else {
-                    self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
+                    self.throwSweetError("Une erreur s'est produite.");
                     return;
                 }
             });
         }).catch(function(error) {
             self.props.removeUserTokenOnStore();
             self.props.removeUserRolesOnStore();
-            if (typeof error.response.data.error === "string") {
-                self.throwSweetError(error.response.data.error);
+            if (error.response !== null) {
+                errors.general = error.response.data.error;
+                self.setState(Object.assign({}, self.state, {
+                    "errors": errors
+                }));
                 return;
             } else {
-                self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
+                self.throwSweetError("Une erreur s'est produite.");
                 return;
             }
         });
@@ -139,9 +151,7 @@ class LoginPage extends Component {
 
     handleRegister(e) {
         e.preventDefault();
-        if (this.props.location.pathname !== "/register") {
-            this.props.history.push("/register");
-        }
+        this.props.history.push("/register");
     }
 
     render() {
@@ -161,14 +171,17 @@ class LoginPage extends Component {
                         <Grid.Column width={10}>
                             <Header dividing size="small" as="h2">Vous avez un compte</Header>
                             <p>Utilisez le formulaire ci-dessous pour vous connecter.</p>
-                            <Form>
-                                <Form.Field required>
+                            <Form error={Object.keys(this.state.errors).length > 0}>
+                                {this.state.errors.general != null ? <Message error header="Erreur" content={this.state.errors.general} /> : <Message error header="Erreur" content="Il y a des erreurs dans le formulaire !" />}
+                                <Form.Field required error={this.state.errors.email != null || this.state.errors.general != null}>
                                     <label>Adresse e-mail</label>
-                                    <Input name="email" type="email" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="email" type="email" placeholder="Votre adresse e-mail" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    {this.state.errors.email != null ? <Message error size="tiny" content={this.state.errors.email} /> : null}
                                 </Form.Field>
-                                <Form.Field required>
+                                <Form.Field required error={this.state.errors.password != null || this.state.errors.general != null}>
                                     <label>Mot de passe</label>
-                                    <Input name="password" type="password" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="password" type="password" placeholder="Votre mot de passe" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    {this.state.errors.password != null ? <Message error size="tiny" content={this.state.errors.password} /> : null}
                                 </Form.Field>
                                 <Divider hidden />
                                 <Responsive maxWidth={768}>
