@@ -27,6 +27,7 @@ import { setSelectedSort } from "../../actions.js";
 import { setKeyword } from "../../actions.js";
 import { removeKeyword } from "../../actions.js";
 import { removeFilters } from "../../actions.js";
+import { triggerRefreshCategoriesList } from "../../actions.js";
 import { Popup } from "semantic-ui-react";
 import moment from "moment";
 import "./MeshesList.css";
@@ -104,6 +105,13 @@ class MeshesList extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if (this.props.selectedSort === nextProps.selectedSort && 
+            this.props.keyword === nextProps.keyword && 
+            JSON.stringify(this.props.selectedFilters) === JSON.stringify(nextProps.selectedFilters) &&
+            this.props.refreshMeshList === nextProps.refreshMeshList) {
+            // Empêche la liste des maillages de se recharger inutilement
+            return;
+        }
         const self = this;
         self.setState(Object.assign({}, self.state, {
             "isLoading": true,
@@ -181,6 +189,7 @@ class MeshesList extends Component {
             if (value === "delete") {
                 const route = baseApiUrl + "/mesh/" + meshId + "/delete/?token=" + self.props.userToken;
                 axios.delete(route).then(function(result) {
+                    self.props.triggerRefreshCategoriesList();
                     let meshes = self.state.meshes;
                     const index = meshes.findIndex(function(mesh) {
                         return mesh.id === meshId;
@@ -420,7 +429,7 @@ const mapStoreToProps = function(store) {
         "userRoles": store.users.userRoles,
         "selectedSort": store.sorts.selectedSort,
         "keyword": store.keyword.keyword,
-        "refreshMeshesList": store.refresh.refreshMeshesList
+        "refreshMeshList": store.refresh.refreshMeshList
     };
 };
 
@@ -437,6 +446,9 @@ const mapDispatchToProps = function(dispatch) {
         },
         "setSelectedSortOnStore": function(sort) {
             dispatch(setSelectedSort(sort));
+        },
+        "triggerRefreshCategoriesList": function() {
+            dispatch(triggerRefreshCategoriesList());
         }
     };
 };

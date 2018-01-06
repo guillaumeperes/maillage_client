@@ -48,6 +48,12 @@ class TagsSidebar extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if (JSON.stringify(this.props.selectedFilters) === JSON.stringify(nextProps.selectedFilters) && 
+            this.props.keyword === nextProps.keyword && 
+            this.props.refreshCategoriesList === nextProps.refreshCategoriesList) {
+            // Empêche la liste des catégories de se recharger inutilement
+            return;
+        }
         const self = this;
         let params = {};
         if (nextProps.selectedFilters.length > 0) {
@@ -105,8 +111,8 @@ class TagsSidebar extends Component {
     }
 
     handleMeshUploadSuccess() {
-        this.props.refreshCategoriesList();
-        this.props.refreshMeshList();
+        this.props.triggerRefreshCategoriesList();
+        this.props.triggerRefreshMeshList();
     }
 
     renderCategories(categories) {
@@ -176,10 +182,10 @@ const mapDispatchToProps = function(dispatch) {
         "removeFilterOnStore": function(filter) {
             dispatch(removeFilter(filter));
         },
-        "refreshCategoriesList": function() {
+        "triggerRefreshCategoriesList": function() {
             dispatch(triggerRefreshCategoriesList());
         },
-        "refreshMeshList": function() {
+        "triggerRefreshMeshList": function() {
             dispatch(triggerRefreshMeshList());
         }
     };
