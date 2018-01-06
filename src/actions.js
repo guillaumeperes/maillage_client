@@ -92,3 +92,21 @@ export function removeUserRoles() {
         "type": "REMOVE_USER_ROLES"
     };
 };
+
+/**
+* Déclenche le refresh de la liste des maillages
+*/
+export function triggerRefreshMeshList() {
+    return {
+        "type": "TRIGGER_REFRESH_MESH_LIST"
+    };
+};
+
+/**
+* Déclenche le refresh de la liste des catégories
+*/
+export function triggerRefreshCategoriesList() {
+    return {
+        "type": "TRIGGER_REFRESH_CATEGORIES_LIST"
+    };
+};

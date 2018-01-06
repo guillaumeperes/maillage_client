@@ -10,10 +10,13 @@ import { TextArea } from "semantic-ui-react";
 import { Dropdown } from "semantic-ui-react";
 import { Header } from "semantic-ui-react";
 import { Divider } from "semantic-ui-react";
+import { Progress } from "semantic-ui-react";
 import { Image } from "semantic-ui-react";
+import { Message } from "semantic-ui-react";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 import swal from "sweetalert";
+import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import Dropzone from "react-dropzone";
 import "./NouveauMaillage.css";
@@ -23,12 +26,17 @@ class NouveauMaillage extends Component{
         super(props);
         this.state = {
             "isOpened": false,
-            "isUploading": false,
             "step": 1,
             "categories": null,
             "mesh": null,
-            "data": {}
+            "data": {},
+            "errors": {},
+            "uploadProgress": 0,
+            "uploadTotal": 100,
+            "uploadError": false
         };
+        this.meshResult = null;
+        this.axiosSource = axios.CancelToken.source();
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
@@ -36,9 +44,14 @@ class NouveauMaillage extends Component{
         this.handleSave = this.handleSave.bind(this);
         this.handleImageDrop = this.handleImageDrop.bind(this);
         this.handleMeshDrop = this.handleMeshDrop.bind(this);
-        this.handleNextStep = this.handleNextStep.bind(this);
+        this.handleSubmitStep1 = this.handleSubmitStep1.bind(this);
+        this.handleSubmitStep2 = this.handleSubmitStep2.bind(this);
+        this.handleSubmitStep3 = this.handleSubmitStep3.bind(this);
+        this.handleSubmitStep4 = this.handleSubmitStep4.bind(this);
         this.handlePreviousStep = this.handlePreviousStep.bind(this);
         this.handleDeleteNewMesh = this.handleDeleteNewMesh.bind(this);
+        this.handleUploadProgress = this.handleUploadProgress.bind(this);
+        this.handleCancelUpload = this.handleCancelUpload.bind(this);
     }
 
     throwSweetError(message) {
@@ -94,22 +107,6 @@ class NouveauMaillage extends Component{
         }).catch(function() {
             self.throwSweetError("Une erreur s'est produite.");
         });
-    }
-
-    handleNextStep() {
-        if (this.state.step < 4) {
-            this.setState(Object.assign({}, this.state, {
-                "step": this.state.step + 1
-            }));
-        }
-    }
-
-    handlePreviousStep() {
-        if (this.state.step > 1) {
-            this.setState(Object.assign({}, this.state, {
-                "step": this.state.step - 1
-            }));
-        }
     }
 
     handleTextInputChange(e, data) {
@@ -200,25 +197,83 @@ class NouveauMaillage extends Component{
         }));
     }
 
-    handleSave() {
-        let data = Object.assign({}, this.state.data);
-        let formData = new FormData();
+    handlePreviousStep() {
+        if (this.state.step > 1) {
+            this.setState(Object.assign({}, this.state, {
+                "step": this.state.step - 1
+            }));
+        }
+    }
 
-        // Vérification des données
+    handleSubmitStep1(e) {
+        if (e.type === "keypress" && e.key !== "Enter") {
+            return;
+        }
+        const data = this.state.data;
+
+        let errors = {};
         if (data.title == null || !data.title.length) {
-            this.throwSweetError("Merci de renseigner un titre");
-            return;
+            errors.title = "Merci de renseigner un titre";
         }
-        formData.append("title", data.title);
         if (data.cells == null || !data.cells.length || /^(0|[1-9]\d*)$/.test(data.cells) === false) {
-            this.throwSweetError("Merci de renseigner un nombre de cellules valide.");
-            return;
+            errors.cells = "Merci de renseigner un nombre de cellules valide.";
         }
-        formData.append("cells", data.cells);
         if (data.vertices == null || !data.vertices.length || /^(0|[1-9]\d*)$/.test(data.vertices) === false) {
-            this.throwSweetError("Merci de renseigner un nombre de sommets valide.");
-            return;
+            errors.vertices = "Merci de renseigner un nombre de sommets valide.";
         }
+        if (Object.keys(errors).length > 0) {
+            this.setState(Object.assign({}, this.state, {
+                "errors": {
+                    "step1": errors
+                }
+            }));
+        } else {
+            this.setState(Object.assign({}, this.state, {
+                "errors": {},
+                "step": 2
+            }));
+        }
+    }
+
+    handleSubmitStep2(e) {
+        this.setState(Object.assign({}, this.state, {
+            "step": 3
+        }));
+    }
+
+    handleSubmitStep3(e) {
+        this.setState(Object.assign({}, this.state, {
+            "step": 4
+        }));
+    }
+
+    handleSubmitStep4(e) {
+        const data = this.state.data;
+
+        let errors = {};
+        if (data.newMesh == null) {
+            errors.mesh = "Merci d'ajouter un fichier de maillage.";
+        }
+        if (Object.keys(errors).length > 0) {
+            this.setState(Object.assign({}, this.state, {
+                "errors": {
+                    "step4": errors
+                }
+            }));
+        } else {
+            this.setState(Object.assign({}, this.state, {
+                "errors": {}
+            }));
+            this.handleSave();
+        }
+    }
+
+    handleSave() {
+        const data = Object.assign({}, this.state.data);
+        const formData = new FormData();
+
+        formData.append("title", data.title);
+        formData.append("cells", data.cells);
         formData.append("vertices", data.vertices);
         if (data.description != null && data.description.length) {
             formData.append("description", data.description);
@@ -227,69 +282,118 @@ class NouveauMaillage extends Component{
             data.tags = Object.values(data.tags).reduce(function(acc, next) {
                 return acc.concat(next);
             });
+            formData.append("tags", data.tags);
         }
-        formData.append("tags", data.tags);
         if (data.newImages != null && data.newImages.length > 0) {
             data.newImages.forEach(function(image) {
                 formData.append("newImage", image);
             });
         }
-        if (data.newMesh != null) {
-            formData.append("newMesh", data.newMesh);
-        }
+        formData.append("newMesh", data.newMesh);
 
-        // Envoi des données au serveur
+        // Envoi des données au serveur pour enregistrement
+
         const self = this;
         const config = {
+            "onUploadProgress": this.handleUploadProgress,
+            "cancelToken": this.axiosSource.token,
             "headers": {
                 "Content-Type": "multipart/form-data"
             }
         };
         if (this.state.mesh != null) {
             const route = baseApiUrl + "/mesh/" + this.state.mesh.id + "/edit/?token=" + this.props.userToken;
-            axios.post(route, formData, config).then(function(response) {
-                console.log(response);
-                //self.closeModal();
+            axios.post(route, formData, config).then(function(result) {
+                self.meshResult = result.data.data.mesh;
             }).catch(function(error) {
-                console.log(error);
-                //self.closeModal();
+                self.setState(Object.assign({}, self.state, {
+                    "uploadError": true
+                }));
+                self.throwSweetError("Une erreur s'est produite.");
             });
         } else {
             const route = baseApiUrl + "/mesh/new/?token=" + this.props.userToken;
-            axios.put(route, formData, config).then(function(response) {
-                console.log(response);
-                //self.closeModal();
+            axios.put(route, formData, config).then(function(result) {
+                self.meshResult = result.data.data.mesh;
             }).catch(function(error) {
-                console.log(error);
-                //self.closeModal();
+                self.setState(Object.assign({}, self.state, {
+                    "uploadError": true
+                }));
+                self.throwSweetError("Une erreur s'est produite."); 
             });
         }
+        this.setState(Object.assign({}, this.state, {
+            "step": 5
+        }));
+    }
+
+    handleUploadProgress(progressEvent) {
+        this.setState(Object.assign({}, this.state, {
+            "uploadProgress": progressEvent.loaded,
+            "uploadTotal": progressEvent.loaded
+        }));
+    }
+
+    handleCancelUpload() {
+        this.axiosSource.cancel();
+        this.setState({
+            "isOpened": false,
+            "step": 1,
+            "categories": null,
+            "mesh": null,
+            "data": {},
+            "errors": {},
+            "uploadProgress": 0,
+            "uploadTotal": 100,
+            "uploadError": false
+        });
+        toast.success("L'envoi du fichier de maillage a été annulé");
     }
 
     closeModal() {
-        const self = this;
-        swal({
-            "title": "Attention",
-            "text": "Si vous quittez dans sauvegarder, vos modifications seront perdues. Êtes-vous certain de vouloir quitter ?",
-            "icon": "warning",
-            "dangerMode": true,
-            "closeOnClickOutside": false,
-            "buttons": {
-                "cancel": "Rester sur cette page",
-                "exit": "Quitter"
+        if (this.state.uploadProgress === this.state.uploadTotal) {
+            if (this.props.meshUploadSuccess !== null && this.meshResult !== null) {
+                this.props.meshUploadSuccess(this.meshResult); // Exécuté seulement quand l'upload a réussi
             }
-        }).then(function(value) {
-            if (value === "exit") {
-                self.setState({
-                    "isOpened": false,
-                    "isUploading": false,
-                    "step": 1,
-                    "categories": null,
-                    "mesh": null,
-                    "data": {}
-                });
-            }
-        });
+            this.setState({
+                "isOpened": false,
+                "step": 1,
+                "categories": null,
+                "mesh": null,
+                "data": {},
+                "errors": {},
+                "uploadProgress": 0,
+                "uploadTotal": 100,
+                "uploadError": false
+            });
+        } else {
+            const self = this;
+            swal({
+                "title": "Attention",
+                "text": "Si vous quittez dans sauvegarder, vos modifications seront perdues. Êtes-vous certain de vouloir quitter ?",
+                "icon": "warning",
+                "dangerMode": true,
+                "closeOnClickOutside": false,
+                "buttons": {
+                    "cancel": "Rester sur cette page",
+                    "exit": "Quitter"
+                }
+            }).then(function(value) {
+                if (value === "exit") {
+                    self.setState({
+                        "isOpened": false,
+                        "step": 1,
+                        "categories": null,
+                        "mesh": null,
+                        "data": {},
+                        "errors": {},
+                        "uploadProgress": 0,
+                        "uploadTotal": 100,
+                        "uploadError": false
+                    });
+                }
+            });
+        }
     }
     
     renderCategories() {
@@ -320,170 +424,189 @@ class NouveauMaillage extends Component{
     }
 
     render(){
-        if (this.state.isUploading) {
-            // TODO
-        } else {
-            // Données du formulaire
-            let modalTitle = <span><Icon name="file" /> Partager un nouveau maillage</span>;
-            if (this.state.mesh != null && this.state.mesh.title != null) {
-                modalTitle = <span><Icon name="file" /> Modifier "{this.state.mesh.title}"</span>;
-            }
-            let titleValue = this.state.data.title || "";
-            let cellsValue = this.state.data.cells || "";
-            let verticesValue = this.state.data.vertices || "";
-            let descriptionValue = this.state.data.description || "";
+        // Données du formulaire
+        let modalTitle = <span><Icon name="file" /> Partager un nouveau maillage</span>;
+        if (this.state.mesh != null && this.state.mesh.title != null) {
+            modalTitle = <span><Icon name="file" /> Modifier "{this.state.mesh.title}"</span>;
+        }
+        let titleValue = this.state.data.title || "";
+        let cellsValue = this.state.data.cells || "";
+        let verticesValue = this.state.data.vertices || "";
+        let descriptionValue = this.state.data.description || "";
 
-            let modalContent = null;
-            let modalActions = null;
+        let modalContent = null;
+        let modalActions = null;
 
-            if (this.state.step === 1) {
-                // Saisie des informations générales
-                modalContent = (
-                    <Form>
-                        <Container fluid>
-                            <Header dividing size="small"><Icon name="file text outline" />Informations générales</Header>
-                            <Form.Field required>
-                                <label>Titre</label>
-                                <Input type="text" name="title" placeholder='Titre' value={titleValue} onChange={this.handleTextInputChange} />
-                            </Form.Field>
-                            <Form.Group widths="equal">
-                                <Form.Field required>
-                                    <label>Nombre de cellules</label>
-                                    <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} />
-                                </Form.Field>
-                                <Form.Field required>
-                                    <label>Nombre de sommets</label>
-                                    <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} />
-                                </Form.Field>
-                            </Form.Group>
-                            <Form.Field>
-                                <label>Description</label>
-                                <TextArea placeholder='Description' name="description" autoHeight value={descriptionValue} onChange={this.handleTextInputChange} />
-                            </Form.Field>
-                        </Container>
-                    </Form>
-                );
-                modalActions = (
-                    <span>
-                        <Button content="Annuler" onClick={this.closeModal} />
-                        <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleNextStep} />
-                    </span>
-                );
-            } else if (this.state.step === 2) {
-                // Saisie des tags
-                modalContent = (
-                    <Form>
-                        <Container fluid>
-                            <Header dividing size="small"><Icon name="tags" />Tags</Header>
-                            {this.renderCategories()}
-                        </Container>
-                    </Form>
-                );
-                modalActions = (
-                    <span>
-                        <Button content="Annuler" onClick={this.closeModal} />
-                        <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
-                        <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleNextStep} />
-                    </span>
-                );
-            } else if (this.state.step === 3) {
-                // Saisie des illustrations
-                let existingImages = [];
-                if (this.state.data.images != null && this.state.data.images.length > 0) {
-                    const self = this;
-                    existingImages = this.state.data.images.map(function(image, i) {
-                        return (
-                            <div className="NouveauMaillage-file" key={i}>
-                                <Image src={baseApiUrl + image.thumbUri} spaced rounded size="mini" floated="left" />
-                                <div><strong>Image {i + 1}</strong></div>
-                                <div><a href="" title="Supprimer" onClick={self.handleDeleteExistingImage.bind(self, i)}><Icon name="trash outline" />Supprimer</a></div>
-                            </div>
-                        );
-                    });
-                }
-                let imagesList = [];
-                if (this.state.data.newImages != null) {
-                    const self = this;
-                    imagesList = this.state.data.newImages.map(function(newImage, i) {
-                        return (
-                            <div className="NouveauMaillage-file" key={i}>
-                                <Image src={newImage.preview} spaced rounded size="mini" floated="left" />
-                                <div><strong>{newImage.name}</strong></div>
-                                <div><a href="" title="Supprimer" onClick={self.handleDeleteNewImage.bind(self, i)}><Icon name="trash outline" />Supprimer</a></div>
-                            </div>
-                        );
-                    });
-                }
-                modalContent = (
+        if (this.state.step === 1) {
+            // Saisie des informations générales
+            modalContent = (
+                <Form error={this.state.errors.step1 != null}>
                     <Container fluid>
-                        <Header dividing size="small"><Icon name="image" />Images</Header>
-                        <p>Vous pouvez illustrer votre fichier de maillage par une ou plusieurs images.</p>
-                        <Dropzone accept="image/jpeg, image/gif, image/png" maxSize={10485760} onDrop={this.handleImageDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px", "textAlign": "center", "padding": "20px 0 15px 0", "fontSize": "13px", "cursor": "pointer"}}>
-                            <div><Icon name="file image outline" size="large" /></div>
-                            <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> des images.</p>
-                        </Dropzone>
-                        {existingImages.length > 0 ? (
-                            <span>
-                                <Divider hidden />
-                                <Header size="tiny">Images existantes</Header>
-                                {existingImages}
-                            </span>
-                        ) : null}
-                        {imagesList.length > 0 ? (
-                            <span>
-                                <Divider hidden />
-                                <Header size="tiny">Nouvelles images</Header>
-                                {imagesList}
-                            </span>
-                        ) : null}
+                        <Header dividing size="small"><Icon name="file text outline" />Informations générales</Header>
+                        {this.state.errors.step1 != null ? <Message error header="Erreur" content="Il y a des erreurs dans le formulaire !" /> : null}
+                        <Form.Field required error={this.state.errors.step1 != null && this.state.errors.step1.title != null}>
+                            <label>Titre</label>
+                            <Input type="text" name="title" placeholder='Titre' value={titleValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
+                            {this.state.errors.step1 != null && this.state.errors.step1.title != null ? <Message error size="tiny" content={this.state.errors.step1.title} /> : null}
+                        </Form.Field>
+                        <Form.Group widths="equal">
+                            <Form.Field required error={this.state.errors.step1 != null && this.state.errors.step1.cells != null}>
+                                <label>Nombre de cellules</label>
+                                <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
+                                {this.state.errors.step1 != null && this.state.errors.step1.cells != null ? <Message error size="tiny" content={this.state.errors.step1.cells} /> : null}
+                            </Form.Field>
+                            <Form.Field required error={this.state.errors.step1 != null && this.state.errors.step1.vertices != null}>
+                                <label>Nombre de sommets</label>
+                                <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
+                                {this.state.errors.step1 != null && this.state.errors.step1.vertices != null ? <Message error size="tiny" content={this.state.errors.step1.vertices} /> : null}
+                            </Form.Field>
+                        </Form.Group>
+                        <Form.Field>
+                            <label>Description</label>
+                            <TextArea placeholder='Description' name="description" autoHeight value={descriptionValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
+                        </Form.Field>
                     </Container>
-                );
-                modalActions = (
-                    <span>
-                        <Button content="Annuler" onClick={this.closeModal} />
-                        <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
-                        <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleNextStep} />
-                    </span>
-                );
-            } else if (this.state.step === 4) {
-                // Saisie du fichier de maillage
-                modalContent = (
+                </Form>
+            );
+            modalActions = (
+                <span>
+                    <Button content="Annuler" onClick={this.closeModal} />
+                    <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleSubmitStep1} />
+                </span>
+            );
+        } else if (this.state.step === 2) {
+            // Saisie des tags
+            modalContent = (
+                <Form>
                     <Container fluid>
-                        <Header dividing size="small"><Icon name="file outline" />Fichier de maillage</Header>
-                        <Dropzone maxSize={104857600} onDrop={this.handleMeshDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px", "textAlign": "center", "padding": "20px 0 15px 0", "fontSize": "13px", "cursor": "pointer"}}>
-                            <div><Icon name="file image outline" size="large" /></div>
-                            <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> un fichier.</p>
-                        </Dropzone>
-                        {this.state.data.newMesh != null ? (
-                            <span>
-                                <Divider hidden />
-                                <Header size="tiny">Nouveau fichier de maillage</Header>
-                                <div className="NouveauMaillage-file">
-                                    <div style={{float: "left"}}><Icon name="file outline" /></div>
-                                    <div><strong>{this.state.data.newMesh.name}</strong></div>
-                                    <div><a href="" title="Supprimer" onClick={this.handleDeleteNewMesh}><Icon name="trash outline" />Supprimer</a></div>
-                                </div>
-                            </span>
-                        ) : null}
+                        <Header dividing size="small"><Icon name="tags" />Tags</Header>
+                        {this.renderCategories()}
                     </Container>
-                );
-                modalActions = (
-                    <span>
-                        <Button content="Annuler" onClick={this.closeModal} />
-                        <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
-                        <Button primary icon="save" content="Enregistrer" labelPosition="left" onClick={this.handleSave} />
-                    </span>
-                );
+                </Form>
+            );
+            modalActions = (
+                <span>
+                    <Button content="Annuler" onClick={this.closeModal} />
+                    <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
+                    <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleSubmitStep2} />
+                </span>
+            );
+        } else if (this.state.step === 3) {
+            // Saisie des illustrations
+            let existingImages = [];
+            if (this.state.data.images != null && this.state.data.images.length > 0) {
+                const self = this;
+                existingImages = this.state.data.images.map(function(image, i) {
+                    return (
+                        <div className="NouveauMaillage-file" key={i}>
+                            <Image src={baseApiUrl + image.thumbUri} spaced rounded size="mini" floated="left" />
+                            <div><strong>Image {i + 1}</strong></div>
+                            <div><a href="" title="Supprimer" onClick={self.handleDeleteExistingImage.bind(self, i)}><Icon name="trash outline" />Supprimer</a></div>
+                        </div>
+                    );
+                });
             }
-
-            return (
-                <Modal onOpen={this.openModal} open={this.state.isOpened} trigger={this.props.children} closeIcon onClose={this.closeModal}>
-                    <Modal.Header>{modalTitle}</Modal.Header>
-                    <Modal.Content>{modalContent}</Modal.Content>
-                    <Modal.Actions>{modalActions}</Modal.Actions>
-                </Modal>
+            let imagesList = [];
+            if (this.state.data.newImages != null) {
+                const self = this;
+                imagesList = this.state.data.newImages.map(function(newImage, i) {
+                    return (
+                        <div className="NouveauMaillage-file" key={i}>
+                            <Image src={newImage.preview} spaced rounded size="mini" floated="left" />
+                            <div><strong>{newImage.name}</strong></div>
+                            <div><a href="" title="Supprimer" onClick={self.handleDeleteNewImage.bind(self, i)}><Icon name="trash outline" />Supprimer</a></div>
+                        </div>
+                    );
+                });
+            }
+            modalContent = (
+                <Container fluid>
+                    <Header dividing size="small"><Icon name="image" />Images</Header>
+                    <p>Vous pouvez illustrer votre fichier de maillage par une ou plusieurs images.</p>
+                    <Dropzone accept="image/jpeg, image/gif, image/png" maxSize={10485760} onDrop={this.handleImageDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px", "textAlign": "center", "padding": "20px 0 15px 0", "fontSize": "13px", "cursor": "pointer"}}>
+                        <div><Icon name="file image outline" size="large" /></div>
+                        <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> des images.</p>
+                    </Dropzone>
+                    {existingImages.length > 0 ? (
+                        <span>
+                            <Divider hidden />
+                            <Header size="tiny">Images existantes</Header>
+                            {existingImages}
+                        </span>
+                    ) : null}
+                    {imagesList.length > 0 ? (
+                        <span>
+                            <Divider hidden />
+                            <Header size="tiny">Nouvelles images</Header>
+                            {imagesList}
+                        </span>
+                    ) : null}
+                </Container>
+            );
+            modalActions = (
+                <span>
+                    <Button content="Annuler" onClick={this.closeModal} />
+                    <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
+                    <Button primary icon="arrow right" content="Suivant" labelPosition="right" onClick={this.handleSubmitStep3} />
+                </span>
+            );
+        } else if (this.state.step === 4) {
+            // Saisie du fichier de maillage
+            modalContent = (
+                <Container fluid>
+                    <Header dividing size="small"><Icon name="file outline" />Fichier de maillage</Header>
+                    {this.state.errors.step4 != null ? <Message error header="Erreur" content="Il y a des erreurs dans le formulaire !" /> : null}
+                    <Dropzone maxSize={104857600} onDrop={this.handleMeshDrop} style={{"width": "100%", "height": "80px", "borderWidth": "2px", "borderWolor": "rgb(102, 102, 102)", "borderStyle": "dashed", "borderRadius": "5px", "textAlign": "center", "padding": "20px 0 15px 0", "fontSize": "13px", "cursor": "pointer"}}>
+                        <div><Icon name="file image outline" size="large" /></div>
+                        <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> un fichier.</p>
+                    </Dropzone>
+                    {this.state.errors.step4 != null && this.state.errors.step4.mesh != null ? <Message error size="tiny" content={this.state.errors.step4.mesh} /> : null}
+                    {this.state.data.newMesh != null ? (
+                        <span>
+                            <Divider hidden />
+                            <Header size="tiny">Nouveau fichier de maillage</Header>
+                            <div className="NouveauMaillage-file">
+                                <div style={{float: "left"}}><Icon name="file outline" /></div>
+                                <div><strong>{this.state.data.newMesh.name}</strong></div>
+                                <div><a href="" title="Supprimer" onClick={this.handleDeleteNewMesh}><Icon name="trash outline" />Supprimer</a></div>
+                            </div>
+                        </span>
+                    ) : null}
+                </Container>
+            );
+            modalActions = (
+                <span>
+                    <Button content="Annuler" onClick={this.closeModal} />
+                    <Button primary icon="arrow left" content="Précédent" labelPosition="left" onClick={this.handlePreviousStep} />
+                    <Button primary icon="save" content="Enregistrer" labelPosition="left" onClick={this.handleSubmitStep4} />
+                </span>
+            );
+        } else if (this.state.step === 5) {
+            // Barre de progression
+            const uploadComplete = this.state.uploadProgress === this.state.uploadTotal;
+            modalContent = (
+                <Container fluid>
+                    <Header dividing size="small"><Icon name="upload" />Enregistrement en cours</Header>
+                    <p>L'envoi de votre fichier de maillage est en cours. Merci de patentier.</p>
+                    {uploadComplete ? <Message icon positive><Icon name="checkmark" />Envoi du fichier de maillage effectué avec succès</Message> : null}
+                    <Progress value={this.state.uploadProgress} total={this.state.uploadTotal} color="blue" active={!uploadComplete} success={uploadComplete && !this.state.uploadError} error={this.state.uploadError} progress="percent" />
+                </Container>
+            );
+            modalActions = (
+                <span>
+                    <Button disabled={uploadComplete} content="Annuler" onClick={this.handleCancelUpload} />
+                    <Button primary disabled={!uploadComplete} content="Fermer" onClick={this.closeModal} />
+                </span>
             );
         }
+
+        return (
+            <Modal onOpen={this.openModal} open={this.state.isOpened} trigger={this.props.children} closeIcon onClose={this.closeModal}>
+                <Modal.Header>{modalTitle}</Modal.Header>
+                <Modal.Content>{modalContent}</Modal.Content>
+                <Modal.Actions>{modalActions}</Modal.Actions>
+            </Modal>
+        );
     }
 }
 

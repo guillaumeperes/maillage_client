@@ -8,6 +8,8 @@ import { Scrollbars } from "react-custom-scrollbars";
 import { connect } from "react-redux";
 import { addFilter } from "../../actions.js";
 import { removeFilter } from "../../actions.js";
+import { triggerRefreshMeshList } from "../../actions.js";
+import { triggerRefreshCategoriesList } from "../../actions.js";
 import { Loader } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
 import { Divider } from "semantic-ui-react";
@@ -24,6 +26,7 @@ class TagsSidebar extends Component {
             "categories": []
         };
         this.checkboxTagChange = this.checkboxTagChange.bind(this);
+        this.handleMeshUploadSuccess = this.handleMeshUploadSuccess.bind(this);
     }
 
     componentDidMount() {
@@ -101,6 +104,11 @@ class TagsSidebar extends Component {
         }
     }
 
+    handleMeshUploadSuccess() {
+        this.props.refreshCategoriesList();
+        this.props.refreshMeshList();
+    }
+
     renderCategories(categories) {
         const self = this;
         const out = categories.map(function(category, i) {
@@ -120,7 +128,7 @@ class TagsSidebar extends Component {
         if (this.state.isLoading) {
             return (
                 <div className="TagsSidebar">
-                    {this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1 ? <span><NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage><Divider hidden /></span> : null }
+                    {this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1 ? <span><NouveauMaillage meshUploadSuccess={this.handleMeshUploadSuccess}><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage><Divider hidden /></span> : null }
                     <div className="TagsSidebar-loader">
                         <Dimmer.Dimmable as="div">
                             <Dimmer active inverted>
@@ -137,7 +145,7 @@ class TagsSidebar extends Component {
             }
             return (
                 <div className="TagsSidebar">
-                    {this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1 ? <span><NouveauMaillage><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage><Divider hidden /></span> : null }
+                    {this.props.userToken !== null && this.props.userRoles.indexOf("contributor") !== -1 ? <span><NouveauMaillage meshUploadSuccess={this.handleMeshUploadSuccess}><Button primary fluid icon="plus" content="Partager un maillage" labelPosition="left" /></NouveauMaillage><Divider hidden /></span> : null }
                     <Scrollbars style={{ width: "100%", height: nanoscrollerheight }}>
                         <div className="TagsSidebar-list">
                             { this.renderCategories(this.state.categories) }
@@ -155,7 +163,8 @@ const mapStoreToProps = function(store) {
         "selectedFilters": selectedFilters,
         "userToken": store.users.userToken,
         "userRoles": store.users.userRoles,
-        "keyword": store.keyword.keyword
+        "keyword": store.keyword.keyword,
+        "refreshCategoriesList": store.refresh.refreshCategoriesList
     };
 };
 
@@ -166,6 +175,12 @@ const mapDispatchToProps = function(dispatch) {
         },
         "removeFilterOnStore": function(filter) {
             dispatch(removeFilter(filter));
+        },
+        "refreshCategoriesList": function() {
+            dispatch(triggerRefreshCategoriesList());
+        },
+        "refreshMeshList": function() {
+            dispatch(triggerRefreshMeshList());
         }
     };
 };
