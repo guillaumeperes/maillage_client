@@ -419,7 +419,8 @@ const mapStoreToProps = function(store) {
         "userToken": store.users.userToken,
         "userRoles": store.users.userRoles,
         "selectedSort": store.sorts.selectedSort,
-        "keyword": store.keyword.keyword
+        "keyword": store.keyword.keyword,
+        "refreshMeshesList": store.refresh.refreshMeshesList
     };
 };
 
