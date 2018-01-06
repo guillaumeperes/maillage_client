@@ -38,6 +38,7 @@ class LoginPage extends Component {
 
     constructor(props) {
         super(props);
+        window.scrollTo(0, 0);
         document.title = "Connexion | Le château fort";
         this.state = {
             "data": {},

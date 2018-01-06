@@ -11,6 +11,7 @@ import { List } from "semantic-ui-react";
 import { Button } from "semantic-ui-react";
 import { Icon } from "semantic-ui-react";
 import { Input } from "semantic-ui-react";
+import { Message } from "semantic-ui-react";
 import swal from "sweetalert";
 import validator from "email-validator";
 import { baseApiUrl } from "../../conf";
@@ -30,8 +31,10 @@ class RegisterPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            "data": {}
+            "data": {},
+            "errors": {}
         };
+        window.scrollTo(0, 0);
         document.title = "Inscription | Le château fort";
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFormData = this.handleFormData.bind(this);
@@ -51,33 +54,34 @@ class RegisterPage extends Component {
         if (e.type === "keypress" && e.key !== "Enter") {
             return;
         }
-        
-        const self = this;
-        const data = self.state.data;
+        const data = this.state.data;
 
-        // Vérification des champs
+        // Validation des données
+
+        let errors = {};
         if (data.email == null || !data.email.length || !validator.validate(data.email)) {
-            self.throwSweetError("Merci de renseigner une adresse e-mail valide.");
-            return;
+            errors.email = "Merci de renseigner une adresse e-mail valide.";
         }
         if (data.password == null || !data.password.length) {
-            self.throwSweetError("Merci de renseigner votre mot de passe.");
-            return;
-        }
-        if (data.password.length < 5) {
-            self.throwSweetError("Votre mot de passe doit comporter au moins 5 caractères.");
-            return;
+            errors.password = "Merci de renseigner un mot de passe.";
+        } else if (data.password.length < 5) {
+            errors.password = "Votre mot de passe doit comporter au moins 5 caractères.";
         }
         if (data.password2 == null || !data.password2.length) {
-            self.throwSweetError("Merci de confirmer votre mot de passe.");
-            return;
+            errors.password2 = "Merci de renseigner la confirmation de votre mot de passe.";
+        } else if (data.password !== data.password2) {
+            errors.password2 = "Votre mot de passe et sa confirmation doivent être identiques.";
         }
-        if (data.password !== data.password2) {
-            self.throwSweetError("Votre mot de passe et sa confirmation doivent être identiques.");
+        this.setState(Object.assign({}, this.state, {
+            "errors": errors
+        }));
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
         // Envoi des données au serveur
+
+        const self = this;
         const route = baseApiUrl + "/register";
         axios.post(route, data).then(function(result) {
             swal({
@@ -90,10 +94,15 @@ class RegisterPage extends Component {
                 return;
             });
         }).catch(function(error) {
-            if (typeof error.response.data.error === "string") {
-                self.throwSweetError(error.response.data.error);
+            if (error.response != null) {
+                errors.general = error.response.data.error;
+                self.setState(Object.assign({}, self.state, {
+                    "errors": errors
+                }));
+                return;
             } else {
-                self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
+                self.throwSweetError("Une erreur s'est produite.");
+                return;
             }
         });
     }
@@ -125,26 +134,30 @@ class RegisterPage extends Component {
                             <Header dividing size="small" as="h2">Vos informations</Header>
                             <p>Merci de compléter le formulaire suivant pour demander la création de votre compte.</p>
                             <Divider hidden />
-                            <Form>
+                            <Form error={Object.keys(this.state.errors).length > 0}>
+                                {this.state.errors.general != null ? <Message error header="Erreur" content={this.state.errors.general} /> : <Message error header="Erreur" content="Il y a des erreurs dans le formulaire !" />}
                                 <Form.Field>
                                     <label>Nom</label>
-                                    <Input name="lastname" type="text" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="lastname" type="text" placeholder="Votre nom" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
                                 <Form.Field>
                                     <label>Prénom</label>
-                                    <Input name="firstname" type="text" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="firstname" type="text" placeholder="Votre prénom" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
                                 </Form.Field>
-                                <Form.Field required>
+                                <Form.Field required error={this.state.errors.email != null || this.state.errors.general != null}>
                                     <label>Adresse e-mail</label>
-                                    <Input name="email" type="email" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="email" type="email" placeholder="Votre adresse e-mail" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    {this.state.errors.email != null ? <Message error size="tiny" content={this.state.errors.email} /> : null}
                                 </Form.Field>
-                                <Form.Field required>
+                                <Form.Field required error={this.state.errors.password != null || this.state.errors.general != null}>
                                     <label>Mot de passe</label>
-                                    <Input name="password" type="password" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="password" type="password" placeholder="Votre mot de passe" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    {this.state.errors.password != null ? <Message error size="tiny" content={this.state.errors.password} /> : null}
                                 </Form.Field>
-                                <Form.Field required>
+                                <Form.Field required error={this.state.errors.password2 != null || this.state.errors.general != null}>
                                     <label>Confirmez votre mot de passe</label>
-                                    <Input name="password2" type="password" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    <Input name="password2" type="password" placeholder="Confirmation de votre mot de passe" onChange={this.handleFormData} onKeyPress={this.handleSubmit} />
+                                    {this.state.errors.password2 != null ? <Message error size="tiny" content={this.state.errors.password2} /> : null}
                                 </Form.Field>
                                 <Divider hidden />
                                 <Responsive maxWidth={768}>
