@@ -175,6 +175,7 @@ class MeshesList extends Component {
     }
 
     handleMeshEditSuccess(mesh) {
+        this.props.triggerRefreshCategoriesList();
         let meshes = this.state.meshes;
         const index = meshes.findIndex(function(m) {
             return mesh.id === m.id;
