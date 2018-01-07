@@ -309,7 +309,9 @@ class NouveauMaillage extends Component{
             data.tags = Object.values(data.tags).reduce(function(acc, next) {
                 return acc.concat(next);
             });
-            formData.append("tags", data.tags);
+            data.tags.forEach(function(tag) {
+                formData.append("tags", tag);
+            });
         }
         if (data.images != null && data.images.length > 0) {
             data.images.forEach(function(image) {

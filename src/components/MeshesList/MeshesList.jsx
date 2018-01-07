@@ -312,8 +312,11 @@ class MeshesList extends Component {
         const out = this.state.meshes.map(function(mesh, i) {
             // Miniature
             let thumb = null;
-            if (typeof mesh.images[0].thumbUri === "string") {
-                thumb = <Image width="70px" height="70px" verticalAlign="middle" alt={mesh.title} shape="rounded" floated="left" src={baseApiUrl + mesh.images[0].thumbUri} />;
+            const defaultimage = mesh.images.find(function(image) {
+                return image.isDefault === true;
+            });
+            if (defaultimage != null) {
+                thumb = <Image width="70px" height="70px" verticalAlign="middle" shape="rounded" floated="left" src={baseApiUrl + defaultimage.thumbUri} />;
             }
             // Tags
             let meshTags = [];
