@@ -113,7 +113,7 @@ class LoginPage extends Component {
                     return role.name;
                 });
                 self.props.setUserRolesOnStore(roles);
-                toast.success(rolesResult.data.message); 
+                toast.success("Vous êtes maintenant connecté."); 
                 self.props.history.push("/");
             }).catch(function(error) {
                 self.props.removeUserTokenOnStore();
