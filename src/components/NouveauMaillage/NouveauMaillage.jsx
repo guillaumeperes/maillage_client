@@ -52,6 +52,7 @@ class NouveauMaillage extends Component{
         this.handleDeleteNewMesh = this.handleDeleteNewMesh.bind(this);
         this.handleUploadProgress = this.handleUploadProgress.bind(this);
         this.handleCancelUpload = this.handleCancelUpload.bind(this);
+        this.handleDeleteExistingMesh = this.handleDeleteExistingMesh.bind(this);
     }
 
     throwSweetError(message) {
@@ -84,6 +85,7 @@ class NouveauMaillage extends Component{
                     "cells": response.data.cells,
                     "vertices": response.data.vertices,
                     "description": response.data.description,
+                    "mesh": response.data.filename,
                     "tags": {},
                     "images": response.data.images
                 };
@@ -180,9 +182,34 @@ class NouveauMaillage extends Component{
         });
     }
 
+    handleDeleteExistingMesh(e) {
+        e.preventDefault();
+        const self = this;
+        swal({
+            "title": "Attention",
+            "text": "Souhaitez-vous vraiment supprimer ce fichier ?",
+            "icon": "warning",
+            "dangerMode": true,
+            "closeOnClickOutside": false,
+            "buttons": {
+                "cancel": "Non",
+                "delete": "Oui"
+            }
+        }).then(function(value) {
+            if (value === "delete") {
+                self.setState(Object.assign({}, self.state, {
+                    "data": Object.assign({}, self.state.data, {
+                        "mesh": null
+                    })
+                }));
+            }
+        });
+    }
+
     handleMeshDrop(files) {
         this.setState(Object.assign({}, this.state, {
             "data": Object.assign({}, this.state.data, {
+                "mesh": null,
                 "newMesh": files[0]
             })
         }));
@@ -251,7 +278,7 @@ class NouveauMaillage extends Component{
         const data = this.state.data;
 
         let errors = {};
-        if (data.newMesh == null) {
+        if (data.mesh == null && data.newMesh == null) {
             errors.mesh = "Merci d'ajouter un fichier de maillage.";
         }
         if (Object.keys(errors).length > 0) {
@@ -284,12 +311,19 @@ class NouveauMaillage extends Component{
             });
             formData.append("tags", data.tags);
         }
+        if (data.images != null && data.images.length > 0) {
+            data.images.forEach(function(image) {
+                formData.append("images", image.id);
+            });
+        }
         if (data.newImages != null && data.newImages.length > 0) {
             data.newImages.forEach(function(image) {
                 formData.append("newImage", image);
             });
         }
-        formData.append("newMesh", data.newMesh);
+        if (data.newMesh != null) {
+            formData.append("newMesh", data.newMesh);
+        }
 
         // Envoi des données au serveur pour enregistrement
 
@@ -352,7 +386,7 @@ class NouveauMaillage extends Component{
 
     closeModal() {
         if (this.state.uploadProgress === this.state.uploadTotal) {
-            if (this.props.meshUploadSuccess !== null && this.meshResult !== null) {
+            if (this.props.meshUploadSuccess != null && this.meshResult != null) {
                 this.props.meshUploadSuccess(this.meshResult); // Exécuté seulement quand l'upload a réussi
             }
             this.setState({
@@ -561,7 +595,18 @@ class NouveauMaillage extends Component{
                         <p><strong>Cliquez</strong> sur cette zone ou faites-y <strong>glisser</strong> un fichier.</p>
                     </Dropzone>
                     {this.state.errors.step4 != null && this.state.errors.step4.mesh != null ? <Message error size="tiny" content={this.state.errors.step4.mesh} /> : null}
-                    {this.state.data.newMesh != null ? (
+                    {this.state.data.mesh != null && this.state.data.newMesh == null ? (
+                        <span>
+                            <Divider hidden />
+                            <Header size="tiny">Fichier de maillage existant</Header>
+                            <div className="NouveauMaillage-file">
+                                <div style={{float: "left"}}><Icon name="file outline" /></div>
+                                <div><strong>{this.state.data.mesh}</strong></div>
+                                <div><a href="" title="Supprimer" onClick={this.handleDeleteExistingMesh}><Icon name="trash outline" />Supprimer</a></div>
+                            </div>
+                        </span>
+                    ) : null}
+                    {this.state.data.mesh == null && this.state.data.newMesh != null ? (
                         <span>
                             <Divider hidden />
                             <Header size="tiny">Nouveau fichier de maillage</Header>

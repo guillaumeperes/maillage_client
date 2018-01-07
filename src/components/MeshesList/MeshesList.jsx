@@ -51,6 +51,7 @@ class MeshesList extends Component {
         this.handleSearch = this.handleSearch.bind(this);
         this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
         this.handleSaveSearchBarRef = this.handleSaveSearchBarRef.bind(this);
+        this.handleMeshEditSuccess = this.handleMeshEditSuccess.bind(this);
     }
 
     componentWillMount() {
@@ -171,6 +172,19 @@ class MeshesList extends Component {
                 "button": "Fermer"
             }).catch(swal.noop);
         });
+    }
+
+    handleMeshEditSuccess(mesh) {
+        let meshes = this.state.meshes;
+        const index = meshes.findIndex(function(m) {
+            return mesh.id === m.id;
+        });
+        if (index !== -1) {
+            meshes[index] = mesh;
+            this.setState(Object.assign({}, this.state, {
+                "meshes": meshes
+            }));
+        }
     }
 
     deleteMesh(meshId) {
@@ -333,7 +347,7 @@ class MeshesList extends Component {
                                 <Dropdown icon={<Icon title="Actions" link name="setting" size="large" />}>
                                     <Dropdown.Menu className="left">
                                         <ViewMeshModal meshId={mesh.id}><Dropdown.Item><Icon name="eye" />Ouvrir</Dropdown.Item></ViewMeshModal>
-                                        {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <NouveauMaillage meshId={mesh.id}><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></NouveauMaillage> : null}
+                                        {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <NouveauMaillage meshId={mesh.id} meshUploadSuccess={self.handleMeshEditSuccess}><Dropdown.Item><Icon name="pencil" />Modifier</Dropdown.Item></NouveauMaillage> : null}
                                         <Dropdown.Divider />
                                         <Dropdown.Item onClick={self.downloadMesh.bind(self, mesh.id)}><Icon name="download" />Télécharger</Dropdown.Item>
                                         {self.props.userToken !== null && self.props.userRoles.indexOf("contributor") !== -1 ? <Dropdown.Divider /> : null}
