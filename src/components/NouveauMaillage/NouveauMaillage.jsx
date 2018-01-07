@@ -310,17 +310,17 @@ class NouveauMaillage extends Component{
                 return acc.concat(next);
             });
             data.tags.forEach(function(tag) {
-                formData.append("tags", tag);
+                formData.append("tags[]", tag);
             });
         }
         if (data.images != null && data.images.length > 0) {
             data.images.forEach(function(image) {
-                formData.append("images", image.id);
+                formData.append("images[]", image.id);
             });
         }
         if (data.newImages != null && data.newImages.length > 0) {
             data.newImages.forEach(function(image) {
-                formData.append("newImage", image);
+                formData.append("newImage[]", image);
             });
         }
         if (data.newMesh != null) {
