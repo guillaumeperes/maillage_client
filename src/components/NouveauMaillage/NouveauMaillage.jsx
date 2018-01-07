@@ -320,7 +320,7 @@ class NouveauMaillage extends Component{
         }
         if (data.newImages != null && data.newImages.length > 0) {
             data.newImages.forEach(function(image) {
-                formData.append("newImage[]", image);
+                formData.append("newImage", image);
             });
         }
         if (data.newMesh != null) {
