@@ -25,6 +25,7 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
         this.clicGestCategories = this.clicGestCategories.bind(this);
         this.clicLogin = this.clicLogin.bind(this);
         this.clicLogout = this.clicLogout.bind(this);
+        this.clicSettings = this.clicSettings.bind(this);
     }
 
     render() {
@@ -34,7 +35,7 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
             rightMenu = (
                 <Dropdown item text="Mon compte">
                     <Dropdown.Menu>
-                        <Dropdown.Item><Icon name="setting" /> Paramètres</Dropdown.Item>
+                        <Dropdown.Item onClick={this.clicSettings}><Icon name="setting" /> Paramètres</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item onClick={this.clicLogout}><Icon name="log out" /> Se déconnecter</Dropdown.Item>
                     </Dropdown.Menu>
@@ -104,6 +105,13 @@ class BarreDuHautAvecLaBareDeRecherche extends Component {
         e.preventDefault();
         if (this.props.location.pathname !== "/") {
             this.props.history.push("/");
+        }
+    }
+
+    clicSettings(e) {
+        e.preventDefault();
+        if (this.props.location.pathname !== "/settings") {
+            this.props.history.push("/settings");
         }
     }
 }

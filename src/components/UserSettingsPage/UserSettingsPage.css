@@ -1,0 +1,11 @@
+.UserSettingsPage .UserSettingsPage-content {
+    margin-top: 90px !important;
+}
+.UserSettingsPage .UserSettingsPage-loader {
+    margin-top: 90px;
+}
+.UserSettingsPage .UserSettingsPage-footer {
+    margin-top: 170px !important;
+    padding-top: 50px !important;
+    padding-bottom: 180px !important;
+}

@@ -9,6 +9,7 @@ import AdminUsersPage from "../AdminUsersPage/AdminUsersPage";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import LoginPage from "../LoginPage/LoginPage";
 import RegisterPage from "../RegisterPage/RegisterPage";
+import UserSettingsPage from "../UserSettingsPage/UserSettingsPage";
 import { connect } from "react-redux";
 
 class Router extends Component {
@@ -20,6 +21,8 @@ class Router extends Component {
                     <Route exact path="/" component={HomePage} />
                     {p.userToken == null ? <Route exact path="/login" component={LoginPage} /> : null}
                     {p.userToken == null ? <Route exact path="/register" component={RegisterPage} /> : null}
+                    {p.userToken !== null ? <Route exact path="/settings" component={UserSettingsPage} /> : null}
+                    {p.userToken !== null ? <Route exact path="/settings/edit" component={UserSettingsPage} /> : null}
                     {p.userToken !== null && p.userRoles.indexOf("administrator") !== -1 ? <Route exact path="/admin/categories/" component={AdminCategoriesPage} /> : null}
                     {p.userToken !== null && p.userRoles.indexOf("administrator") !== -1 ? <Route exact path="/admin/users/" component={AdminUsersPage} /> : null}
                     <Route component={PageNotFound} />
