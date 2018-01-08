@@ -2,60 +2,136 @@ import React from "react";
 import { Component } from "react";
 import { Container } from "semantic-ui-react";
 import { Header } from "semantic-ui-react";
-import { Icon, Table } from "semantic-ui-react";
+import { Icon } from "semantic-ui-react";
+import { Table } from "semantic-ui-react";
 import { Dimmer } from "semantic-ui-react";
 import { Loader } from "semantic-ui-react";
-import { Button } from 'semantic-ui-react';
-import { Scrollbars } from "react-custom-scrollbars";
-import { Label } from 'semantic-ui-react';
+import { Popup } from 'semantic-ui-react';
 import { Segment } from "semantic-ui-react";
 import { Grid } from "semantic-ui-react";
 import { List } from "semantic-ui-react";
+import { Divider } from "semantic-ui-react";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
+import moment from "moment";
 import swal from "sweetalert";
 import "./AdminUsersPage.css";
-
-
 import BarreDuHautAvecLaBareDeRecherche from "../BarreDuHautAvecLaBareDeRecherche/BarreDuHautAvecLaBareDeRecherche";
 import { baseApiUrl } from "../../conf";
 import axios from "axios";
 
-
-export class AdminUsersPage extends Component {
+class AdminUsersPage extends Component {
     constructor(props) {
         super(props);
         document.title = "Gestion des utilisateurs | Le château fort";
+        window.scrollTo(0, 0);
         this.state = {
             "isLoading": true,
             "error": false,
-            "utilisateurs": []
+            "pending": [],
+            "utilisateurs": [],
         };
     }
+
+    throwSweetError(message) {
+        swal({
+            "title": "Erreur",
+            "text": message,
+            "dangerMode": true,
+            "icon": "error",
+            "button": "Fermer"
+        }).catch(swal.noop);
+    }
     
-    componentDidMount() {
+    componentWillMount() {
         const self = this;
-        const route = baseApiUrl + "/users/list/";
-        axios.get(route).then(function(response) {
-            self.setState({
-                "isLoading": false,
-                "error": false,
-                "utilisateurs": response.data
-            });
-        }).catch(function(error) {
-            self.setState({
-                "isLoading": false,
-                "error": true,
-                "utilisateurs": []
-            });
+        let promises = [];
+
+        const pending = baseApiUrl + "/users/list/pending/?token=" + this.props.userToken;
+        promises[0] = axios.get(pending).then(function(result) {
+            self.setState(Object.assign({}, self.state, {
+                "pending": result.data
+            }));
         });
+        const users = baseApiUrl + "/users/list/confirmed/?token=" + this.props.userToken;
+        promises[1] = axios.get(users).then(function(result) {
+            self.setState(Object.assign({}, self.state, {
+                "utilisateurs": result.data
+            }));
+        });
+        Promise.all(promises).then(function() {
+            self.setState(Object.assign({}, self.state, {
+                "isLoading": false,
+                "error": false
+            }));
+        }).catch(function() {
+            self.setState(Object.assign({}, self.state, {
+                "isLoading": false,
+                "error": true
+            }));
+        });
+    }
+
+    handleConfirmUser(userId, e) {
+        const self = this;
+        swal({
+            "title": "Attention",
+            "text": "Êtes-vous certain de vouloir activer le compte de cet utilisateur ?",
+            "icon": "warning",
+            "buttons": {
+                "cancel": "Non",
+                "confirm": "Oui"
+            }
+        }).then(function(value) {
+            if (value) {
+                const route = baseApiUrl + "/users/" + userId + "/confirm/?token=" + self.props.userToken;
+                axios.post(route).then(function(result) {
+                    self.setState(Object.assign({}, self.state, {
+                        "isLoading": true
+                    }));
+                    let promises = [];
+                    const pending = baseApiUrl + "/users/list/pending/?token=" + self.props.userToken;
+                    promises[0] = axios.get(pending).then(function(result) {
+                        self.setState(Object.assign({}, self.state, {
+                            "pending": result.data
+                        }));
+                    });
+                    const users = baseApiUrl + "/users/list/confirmed/?token=" + self.props.userToken;
+                    promises[1] = axios.get(users).then(function(result) {
+                        self.setState(Object.assign({}, self.state, {
+                            "utilisateurs": result.data
+                        }));
+                    });
+                    Promise.all(promises).then(function() {
+                        self.setState(Object.assign({}, self.state, {
+                            "isLoading": false,
+                            "error": false
+                        }));
+                    });
+                }).catch(function(error) {
+                    console.log(error);
+                    if (error.response != null) {
+                        self.throwSweetError(error.response.data.error);
+                        return;
+                    } else {
+                        self.throwSweetError("Une erreur s'est produite.");
+                        return;
+                    }
+                });
+            }
+        });
+    }
+
+    handleEditUser(userId, e) {
+        console.log(userId);
+        // TODO
     }
     
     handleDeleteUser(userId, e) {
         const self = this;
         swal({
             "title": "Attention",
-            "text": "Êtes-vous certain de supprimer cet utilisateur ?",
+            "text": "Êtes-vous certain de vouloir effacer cet utilisateur ?",
             "icon": "warning",
             "dangerMode": true,
             "buttons": {
@@ -66,45 +142,45 @@ export class AdminUsersPage extends Component {
             if (value === "delete") {
                 const route = baseApiUrl + "/users/" + userId + "/delete/?token=" + self.props.userToken;
                 axios.delete(route).then(function(result) {
+                    let pendings = self.state.pending;
+                    let index = pendings.findIndex(function(pending) {
+                        return pending.id === userId
+                    });
+                    if (index !== -1) {
+                        pendings.splice(index, 1);
+                        self.setState(Object.assign({}, self.state, {
+                            "pending": pendings
+                        }));
+                        return;
+                    }
                     let utilisateurs = self.state.utilisateurs;
-                    const index = utilisateurs.findIndex(function(c) {
-                        return c.id === userId;
+                    index = utilisateurs.findIndex(function(utilisateur) {
+                        return utilisateur.id === userId;
                     });
-                    utilisateurs.splice(index, 1);
-                    const state = Object.assign({}, self.state, {
-                        "utilisateurs": utilisateurs
-                    });
-                    self.setState(state);
-                    toast.success("L'utilisateur a été supprimée avec succès.");
+                    if (index !== -1) {
+                        utilisateurs.splice(index, 1);
+                        self.setState(Object.assign({}, self.state, {
+                            "utilisateurs": utilisateurs
+                        }));
+                        return;
+                    }
+                    toast.success("L'utilisateur a été effacé avec succès.");
                 }).catch(function(error) {
                     if (error.response !== null) {
                         self.throwSweetError(error.response.data.error);
+                        return;
                     } else {
-                        self.throwSweetError("Une erreur s'est produite. Merci de réessayer.");
+                        self.throwSweetError("Une erreur s'est produite.");
+                        return;
                     }
-                });
+                })
             }
         });
-    } 
-    
-    renderUtilisateur(utilisateurs) {
-        const self = this;
-        const out = utilisateurs.map(function(user, i) {
-            return (
-                <Table.Row>
-                    <Table.Cell>{user.email}</Table.Cell>
-                    <Table.Cell>{user.firstname}</Table.Cell>
-                    <Table.Cell>{user.lastname}</Table.Cell>
-                    <Table.Cell>{user.confirmed != null ? <Label color='green'>confirmé</Label> : <Label color='red'>non confirmé</Label> } </Table.Cell>
-                    <Table.Cell> <Icon name='trash' link onClick={self.handleDeleteUser.bind(self, user.id)}/><Button> <Icon name='checkmark'/></Button><Button><Icon name='write' /></Button></Table.Cell>
-                </Table.Row> 
-            );
-        });
-        return out;
     }
-    
-    renderContent(){
-        let content = '';
+
+    render() {
+        const self = this;
+        let content = null;
         if (this.state.isLoading) {
             content = (
                 <Dimmer.Dimmable as="div" className="AdminCategoriesPage-loader">
@@ -113,38 +189,100 @@ export class AdminUsersPage extends Component {
                     </Dimmer>
                 </Dimmer.Dimmable>
             );
-        } else if (this.state.utilisateurs.length === 0) {
+        } else if (this.state.error) {
             content = (
                 <Container fluid textAlign="center">
-                    <Icon name="search" size="huge" color="grey" />
-                    <div>Ok ta mer.</div>
+                    <Divider hidden /> 
+                    <Header icon><Icon name="warning sign" size="huge" color="grey" /> Une erreur s'est produite.</Header>
                 </Container>
             );
         } else {
-            const utilisateurs = this.renderUtilisateur(this.state.utilisateurs)
-            content =(
-                    <Table className="AdminUsersPage-table">
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell>E-mail</Table.HeaderCell>
-                            <Table.HeaderCell>Nom</Table.HeaderCell>
-                            <Table.HeaderCell>Prénom</Table.HeaderCell>
-                            <Table.HeaderCell>Statut</Table.HeaderCell>
-                            <Table.HeaderCell>Action</Table.HeaderCell>
+            let pendingtable = null;
+            if (this.state.pending.length > 0) {
+                const rows = this.state.pending.map(function(row, i) {
+                    return (
+                        <Table.Row key={i}>
+                            <Table.Cell width={6}>{row.email}</Table.Cell>
+                            <Table.Cell width={4}>{row.lastname}</Table.Cell>
+                            <Table.Cell width={4}>{row.firstname}</Table.Cell>
+                            <Table.Cell width={2}>
+                                <Popup content="Activer ce compte utilisateur" position="bottom right" size="small" hideOnScroll inverted trigger={<Icon link name="checkmark" size="large" onClick={self.handleConfirmUser.bind(self, row.id)} />} />
+                                <Popup content="Effacer ce compte utilisateur" position="bottom right" size="small" hideOnScroll inverted trigger={<Icon link name="trash outline" size="large" onClick={self.handleDeleteUser.bind(self, row.id)} />} />
+                            </Table.Cell>
                         </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {utilisateurs}
-                    </Table.Body>
-                </Table>
-            );     
+                    );
+                });
+                pendingtable = (
+                    <div>
+                        <Header as="h3" dividing>Utilisateurs en attente</Header>
+                        <Divider hidden />
+                        <Table>
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell width={6}>Adresse e-mail</Table.HeaderCell>
+                                    <Table.HeaderCell width={4}>Nom</Table.HeaderCell>
+                                    <Table.HeaderCell width={4}>Prénom</Table.HeaderCell>
+                                    <Table.HeaderCell width={2}>Actions</Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                                {rows}
+                            </Table.Body>
+                        </Table>
+                    </div>
+                );
+            }
+            let confirmedtable = null;
+            if (this.state.utilisateurs.length > 0) {
+                const rows = this.state.utilisateurs.map(function(row, i) {
+                    const roles = row.roles.map(function(role, j) {
+                        return <div key={j}>{role.title}</div>;
+                    });
+                    return (
+                        <Table.Row key={i}>
+                            <Table.Cell width={4}>{row.email}</Table.Cell>
+                            <Table.Cell width={3}>{row.lastname}</Table.Cell>
+                            <Table.Cell width={3}>{row.firstname}</Table.Cell>
+                            <Table.Cell width={2}>{roles}</Table.Cell>
+                            <Table.Cell width={2}>{moment(row.confirmed).format("DD/MM/YYYY - HH:mm:ss")}</Table.Cell>
+                            <Table.Cell width={2}>
+                                <Popup content="Modifier ce compte utilisateur" position="bottom right" size="small" hideOnScroll inverted trigger={<Icon link name="pencil" size="large" onClick={self.handleEditUser.bind(self, row.id)} />} />
+                                <Popup content="Effacer ce compte utilisateur" position="bottom right" size="small" hideOnScroll inverted trigger={<Icon link name="trash outline" size="large" onClick={self.handleDeleteUser.bind(self, row.id)} />} />
+                            </Table.Cell>
+                        </Table.Row>
+                    );
+                });
+                confirmedtable = (
+                    <div>
+                        <Header as="h3" dividing>Utilisateurs confirmés</Header>
+                        <Divider hidden />
+                        <Table>
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell width={4}>Adresse e-mail</Table.HeaderCell>
+                                    <Table.HeaderCell width={3}>Nom</Table.HeaderCell>
+                                    <Table.HeaderCell width={3}>Prénom</Table.HeaderCell>
+                                    <Table.HeaderCell width={2}>Rôles</Table.HeaderCell>
+                                    <Table.HeaderCell width={2}>Date de confirmation</Table.HeaderCell>
+                                    <Table.HeaderCell width={2}>Actions</Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                                {rows}
+                            </Table.Body>
+                        </Table>
+                    </div>
+                );
+            }
+            content = (
+                <div>
+                    {pendingtable}
+                    <Divider clearing hidden />
+                    {confirmedtable}
+                </div>
+            );
         }
-        return content; 
-    }
-    
-    
-    
-    render() {
+
         return (
             <div className="AdminUsersPage">
                 <BarreDuHautAvecLaBareDeRecherche />
@@ -153,10 +291,11 @@ export class AdminUsersPage extends Component {
                         <Icon name="users" />
                         <Header.Content>
                             Gestion des utilisateurs
-                            <Header.Subheader>Administration des accès utilisateur</Header.Subheader>
+                            <Header.Subheader>Administration des utilisateurs du site</Header.Subheader>
                         </Header.Content>
                     </Header>
-                    {this.renderContent()}
+                    <Divider clearing hidden />
+                    {content}
                 </Container>
                 <Segment inverted vertical color="grey" className="AdminUsersPage-footer">
                     <Container>

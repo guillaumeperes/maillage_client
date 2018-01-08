@@ -45,6 +45,7 @@ class UserSettingsPage extends Component {
             "data": {},
             "errors": {}
         };
+        window.scrollTo(0, 0);
         this.handleSwitchForm = this.handleSwitchForm.bind(this);
         this.handleDeleteAccount = this.handleDeleteAccount.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);

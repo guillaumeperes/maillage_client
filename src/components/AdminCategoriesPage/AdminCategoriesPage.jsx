@@ -28,6 +28,7 @@ class AdminCategoriesPage extends Component {
     constructor(props) {
         super(props);
         document.title = "Gestion des catégories | Le château fort";
+        window.scrollTo(0, 0);
         this.state = {
             "isLoading": true,
             "categories": [],
