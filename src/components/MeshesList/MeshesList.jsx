@@ -317,7 +317,7 @@ class MeshesList extends Component {
                 return image.isDefault === true;
             });
             if (defaultimage != null) {
-                thumb = <Image width="70px" height="70px" verticalAlign="middle" shape="rounded" floated="left" src={baseApiUrl + defaultimage.thumbUri} />;
+                thumb = <ViewMeshModal meshId={mesh.id}><Image width="70px" height="70px" verticalAlign="middle" shape="rounded" floated="left" style={{cursor: "pointer"}} src={baseApiUrl + defaultimage.thumbUri} /></ViewMeshModal>
             }
             // Tags
             let meshTags = [];
@@ -337,7 +337,7 @@ class MeshesList extends Component {
                             <Grid.Column width={9} verticalAlign="middle">
                                 {thumb}
                                 <div>
-                                    <Header as="h2" size="small">{mesh.title}</Header>
+                                    <ViewMeshModal meshId={mesh.id}><Header as="h2" size="small" style={{cursor: "pointer"}}>{mesh.title}</Header></ViewMeshModal>
                                     <div className="MeshesList-small">#{mesh.id}</div>
                                     <div className="MeshesList-small">{moment(mesh.created).format("DD/MM/YYYY - HH:mm:ss")}</div>
                                     { meshTags.length > 0 ? <div className="MeshesList-tags">{meshTags}</div> : null }
