@@ -112,6 +112,12 @@ class NouveauMaillage extends Component{
     }
 
     handleTextInputChange(e, data) {
+        if (data.name === "vertices" || data.name === "cells") {
+            if (data.value.length > 0 && /^(0|[1-9]\d*)$/.test(data.value) === false) {
+                e.preventDefault();
+                return false;
+            }
+        }
         let o = {};
         o[data.name] = data.value;
         this.setState(Object.assign({}, this.state, {
@@ -488,12 +494,12 @@ class NouveauMaillage extends Component{
                         <Form.Group widths="equal">
                             <Form.Field required error={this.state.errors.step1 != null && this.state.errors.step1.cells != null}>
                                 <label>Nombre de cellules</label>
-                                <Input type="number" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
+                                <Input type="text" name="cells" placeholder='Nombre de cellules' value={cellsValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
                                 {this.state.errors.step1 != null && this.state.errors.step1.cells != null ? <Message error size="tiny" content={this.state.errors.step1.cells} /> : null}
                             </Form.Field>
                             <Form.Field required error={this.state.errors.step1 != null && this.state.errors.step1.vertices != null}>
                                 <label>Nombre de sommets</label>
-                                <Input type="number" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
+                                <Input type="text" name="vertices" placeholder='Nombre de sommets' value={verticesValue} onChange={this.handleTextInputChange} onKeyPress={this.handleSubmitStep1} />
                                 {this.state.errors.step1 != null && this.state.errors.step1.vertices != null ? <Message error size="tiny" content={this.state.errors.step1.vertices} /> : null}
                             </Form.Field>
                         </Form.Group>
